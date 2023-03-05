@@ -45,5 +45,10 @@ public interface HorseService {
   HorseDetailDto getById(long id) throws NotFoundException;
 
 
+  /**
+   *
+   * @param newHorse the horse to add
+   * @return the newly added horse
+   */
   HorseDetailDto create(HorseDetailDto newHorse);
 }

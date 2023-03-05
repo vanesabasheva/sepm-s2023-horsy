@@ -38,5 +38,10 @@ public interface HorseDao {
    */
   Horse getById(long id) throws NotFoundException;
 
+  /**
+   *
+   * @param newHorse the horse to add
+   * @return the newly added horse
+   */
   Horse create(HorseDetailDto newHorse);
 }
