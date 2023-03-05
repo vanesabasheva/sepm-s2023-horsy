@@ -43,4 +43,7 @@ public interface HorseService {
    * @throws NotFoundException if the horse with the given ID does not exist in the persistent data store
    */
   HorseDetailDto getById(long id) throws NotFoundException;
+
+
+  HorseDetailDto create(HorseDetailDto newHorse);
 }

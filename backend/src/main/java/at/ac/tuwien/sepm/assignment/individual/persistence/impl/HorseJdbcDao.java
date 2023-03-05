@@ -7,12 +7,17 @@ import at.ac.tuwien.sepm.assignment.individual.exception.NotFoundException;
 import at.ac.tuwien.sepm.assignment.individual.persistence.HorseDao;
 import at.ac.tuwien.sepm.assignment.individual.type.Sex;
 import java.lang.invoke.MethodHandles;
+import java.sql.Date;
+import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.sql.Statement;
 import java.util.List;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.jdbc.core.JdbcTemplate;
+import org.springframework.jdbc.support.GeneratedKeyHolder;
+import org.springframework.jdbc.support.KeyHolder;
 import org.springframework.stereotype.Repository;
 
 @Repository
@@ -29,6 +34,8 @@ public class HorseJdbcDao implements HorseDao {
       + "  , sex = ?"
       + "  , owner_id = ?"
       + " WHERE id = ?";
+  private static final String SQL_INSERT = "INSERT INTO " + TABLE_NAME
+      + " (name, description, date_of_birth, sex, owner_id) VALUES (?, ?, ?, ?, ?)";
 
   private final JdbcTemplate jdbcTemplate;
 
@@ -82,6 +89,33 @@ public class HorseJdbcDao implements HorseDao {
         .setDateOfBirth(horse.dateOfBirth())
         .setSex(horse.sex())
         .setOwnerId(horse.ownerId())
+        ;
+  }
+
+
+  @Override
+  public Horse create(HorseDetailDto newHorse) {
+    KeyHolder keyHolder = new GeneratedKeyHolder();
+    jdbcTemplate.update(connection -> {
+      PreparedStatement stmt = connection.prepareStatement(SQL_INSERT, Statement.RETURN_GENERATED_KEYS);
+      stmt.setString(1, newHorse.name());
+      stmt.setString(2, newHorse.description());
+      stmt.setDate(3, Date.valueOf(newHorse.dateOfBirth()));
+      stmt.setString(4, newHorse.sex().toString());
+      if (newHorse.ownerId() != null) {
+        stmt.setLong(5, newHorse.ownerId());
+      } else {
+        stmt.setNull(5, java.sql.Types.NULL);
+      }
+      return stmt;
+    }, keyHolder);
+
+    return new Horse()
+        .setName(newHorse.name())
+        .setDescription(newHorse.description())
+        .setDateOfBirth(newHorse.dateOfBirth())
+        .setSex(newHorse.sex())
+        .setOwnerId(newHorse.ownerId())
         ;
   }
 

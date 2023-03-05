@@ -68,6 +68,15 @@ public class HorseServiceImpl implements HorseService {
 
 
   @Override
+  public HorseDetailDto create(HorseDetailDto newHorse) {
+    var createdHorse = dao.create(newHorse);
+    return mapper.entityToDetailDto(
+        createdHorse,
+        ownerMapForSingleId(createdHorse.getOwnerId()));
+  }
+
+
+  @Override
   public HorseDetailDto getById(long id) throws NotFoundException {
     LOG.trace("details({})", id);
     Horse horse = dao.getById(id);
