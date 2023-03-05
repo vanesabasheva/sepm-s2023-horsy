@@ -3,9 +3,11 @@ package at.ac.tuwien.sepm.assignment.individual.service.impl;
 import at.ac.tuwien.sepm.assignment.individual.dto.HorseDetailDto;
 import at.ac.tuwien.sepm.assignment.individual.exception.ConflictException;
 import at.ac.tuwien.sepm.assignment.individual.exception.ValidationException;
+
 import java.lang.invoke.MethodHandles;
 import java.util.ArrayList;
 import java.util.List;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
@@ -39,4 +41,25 @@ public class HorseValidator {
     }
   }
 
+  public void validateForCreate(HorseDetailDto newHorse) {
+    List<String> validationErrors = new ArrayList<>();
+
+    if (newHorse.dateOfBirth() == null) {
+      validationErrors.add("Horse date of borth cannot be empty");
+    }
+    if (newHorse.sex() == null) {
+      validationErrors.add("Horse sex cannot be empty");
+    }
+
+    if (newHorse.description() != null) {
+      if (newHorse.description().isBlank()) {
+        validationErrors.add("Horse description is given but blank");
+      }
+      if (newHorse.description().length() > 4095) {
+        validationErrors.add("Horse description too long: longer than 4095 characters");
+      }
+    }
+
+    // TODO: this is not complete
+  }
 }

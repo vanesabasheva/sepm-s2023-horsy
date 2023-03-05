@@ -69,6 +69,7 @@ public class HorseServiceImpl implements HorseService {
 
   @Override
   public HorseDetailDto create(HorseDetailDto newHorse) {
+    validator.validateForCreate(newHorse);
     var createdHorse = dao.create(newHorse);
     return mapper.entityToDetailDto(
         createdHorse,
