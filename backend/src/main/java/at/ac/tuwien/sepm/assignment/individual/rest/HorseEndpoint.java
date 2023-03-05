@@ -70,6 +70,7 @@ public class HorseEndpoint {
 
   @PostMapping
   public HorseDetailDto create(@RequestBody HorseDetailDto toAdd) {
+    LOG.info("PUT " + BASE_PATH + "/{}", toAdd);
     return service.create(toAdd);
   }
 

@@ -95,6 +95,7 @@ public class HorseJdbcDao implements HorseDao {
 
   @Override
   public Horse create(HorseDetailDto newHorse) {
+    LOG.trace("create({}), persistence", newHorse);
     KeyHolder keyHolder = new GeneratedKeyHolder();
     jdbcTemplate.update(connection -> {
       PreparedStatement stmt = connection.prepareStatement(SQL_INSERT, Statement.RETURN_GENERATED_KEYS);

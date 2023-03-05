@@ -42,6 +42,7 @@ public class HorseValidator {
   }
 
   public void validateForCreate(HorseDetailDto newHorse) {
+    LOG.trace("validateForCreate({})", newHorse);
     List<String> validationErrors = new ArrayList<>();
 
     if (newHorse.dateOfBirth() == null) {
