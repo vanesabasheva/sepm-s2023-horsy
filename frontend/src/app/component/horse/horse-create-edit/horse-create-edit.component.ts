@@ -44,6 +44,8 @@ export class HorseCreateEditComponent implements OnInit {
     switch (this.mode) {
       case HorseCreateEditMode.create:
         return 'Create New Horse';
+      case HorseCreateEditMode.edit:
+        return 'Edit Horse';
       default:
         return '?';
     }
@@ -53,6 +55,8 @@ export class HorseCreateEditComponent implements OnInit {
     switch (this.mode) {
       case HorseCreateEditMode.create:
         return 'Create';
+      case HorseCreateEditMode.edit:
+        return 'Edit';
       default:
         return '?';
     }
@@ -67,6 +71,8 @@ export class HorseCreateEditComponent implements OnInit {
     switch (this.mode) {
       case HorseCreateEditMode.create:
         return 'created';
+      case HorseCreateEditMode.edit:
+        return 'edited';
       default:
         return '?';
     }
@@ -80,6 +86,13 @@ export class HorseCreateEditComponent implements OnInit {
     this.route.data.subscribe(data => {
       this.mode = data.mode;
     });
+
+    if (this.mode === HorseCreateEditMode.edit) {
+      const id = this.route.snapshot.paramMap.get('id');
+      if (id != null) {
+        this.getHorse(Number(id));
+      }
+    }
   }
 
   public dynamicCssClassesForInput(input: NgModel): any {
@@ -97,7 +110,6 @@ export class HorseCreateEditComponent implements OnInit {
       : `${owner.firstName} ${owner.lastName}`;
   }
 
-
   public onSubmit(form: NgForm): void {
     console.log('is form valid?', form.valid, this.horse);
     if (form.valid) {
@@ -108,6 +120,10 @@ export class HorseCreateEditComponent implements OnInit {
       switch (this.mode) {
         case HorseCreateEditMode.create:
           observable = this.service.create(this.horse);
+          break;
+        case HorseCreateEditMode.edit:
+          const id = Number(this.route.snapshot.paramMap.get('id'));
+          observable = this.service.edit(id, this.horse);
           break;
         default:
           console.error('Unknown HorseCreateEditMode', this.mode);
@@ -124,6 +140,17 @@ export class HorseCreateEditComponent implements OnInit {
         }
       });
     }
+  }
+
+  private getHorse(id: number) {
+    this.service.getByID(id).subscribe({
+      next: (data: Horse) => {
+        this.horse = data;
+      },
+      error: (error: any) => {
+        console.error('Error editing horse', error);
+      }
+    });
   }
 
 }

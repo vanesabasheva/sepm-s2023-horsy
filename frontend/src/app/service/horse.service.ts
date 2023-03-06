@@ -39,4 +39,14 @@ export class HorseService {
     );
   }
 
+  getByID(id: number): Observable<Horse> {
+    return this.http.get<Horse>(baseUri + '/' + id);
+  }
+
+  edit(id: number, horse: Horse): Observable<Horse>{
+    return this.http.put<Horse>(
+      baseUri + '/' + id,
+      horse
+    );
+  }
 }
