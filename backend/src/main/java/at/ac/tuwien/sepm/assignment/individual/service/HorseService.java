@@ -52,5 +52,10 @@ public interface HorseService {
    */
   HorseDetailDto create(HorseDetailDto newHorse);
 
+  /**
+   * Deletes the Horse specified by an id.
+   *
+   * @param id the id from the specified horse
+   */
   void delete(long id);
 }

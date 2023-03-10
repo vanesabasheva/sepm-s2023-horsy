@@ -44,6 +44,11 @@ public interface HorseDao {
    * @return the newly added horse
    */
   Horse create(HorseDetailDto newHorse);
-
+  
+  /**
+   * Deletes a horse in the persistent data store.
+   *
+   * @param id the id of the horse to delete
+   */
   void delete(long id);
 }
