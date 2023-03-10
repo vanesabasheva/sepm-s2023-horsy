@@ -90,6 +90,7 @@ public class HorseServiceImpl implements HorseService {
 
   @Override
   public void delete(long id) {
+    LOG.trace("delete({}), service", id);
     dao.delete(id);
   }
 

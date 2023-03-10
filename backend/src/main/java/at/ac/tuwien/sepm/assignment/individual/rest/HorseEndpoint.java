@@ -78,6 +78,7 @@ public class HorseEndpoint {
 
   @DeleteMapping("{id}")
   public void delete(@PathVariable long id) {
+    LOG.info("DELETE " + BASE_PATH + "/{}", id);
     service.delete(id);
   }
 

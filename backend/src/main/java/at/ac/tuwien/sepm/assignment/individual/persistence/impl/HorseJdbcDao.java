@@ -124,6 +124,7 @@ public class HorseJdbcDao implements HorseDao {
 
   @Override
   public void delete(long id) {
+    LOG.trace("delete({}), persistence", id);
     KeyHolder keyHolder = new GeneratedKeyHolder();
     jdbcTemplate.update(connection -> {
       PreparedStatement stmt = connection.prepareStatement(SQL_DELETE, Statement.RETURN_GENERATED_KEYS);
