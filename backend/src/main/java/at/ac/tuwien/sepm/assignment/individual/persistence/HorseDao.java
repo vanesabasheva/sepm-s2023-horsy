@@ -3,6 +3,7 @@ package at.ac.tuwien.sepm.assignment.individual.persistence;
 import at.ac.tuwien.sepm.assignment.individual.dto.HorseDetailDto;
 import at.ac.tuwien.sepm.assignment.individual.entity.Horse;
 import at.ac.tuwien.sepm.assignment.individual.exception.NotFoundException;
+
 import java.util.List;
 
 /**
@@ -20,8 +21,8 @@ public interface HorseDao {
 
   /**
    * Update the horse with the ID given in {@code horse}
-   *  with the data given in {@code horse}
-   *  in the persistent data store.
+   * with the data given in {@code horse}
+   * in the persistent data store.
    *
    * @param horse the horse to update
    * @return the updated horse
@@ -39,9 +40,10 @@ public interface HorseDao {
   Horse getById(long id) throws NotFoundException;
 
   /**
-   *
    * @param newHorse the horse to add
    * @return the newly added horse
    */
   Horse create(HorseDetailDto newHorse);
+
+  void delete(long id);
 }

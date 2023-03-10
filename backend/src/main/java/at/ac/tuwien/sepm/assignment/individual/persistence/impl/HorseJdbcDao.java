@@ -6,6 +6,13 @@ import at.ac.tuwien.sepm.assignment.individual.exception.FatalException;
 import at.ac.tuwien.sepm.assignment.individual.exception.NotFoundException;
 import at.ac.tuwien.sepm.assignment.individual.persistence.HorseDao;
 import at.ac.tuwien.sepm.assignment.individual.type.Sex;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.jdbc.core.JdbcTemplate;
+import org.springframework.jdbc.support.GeneratedKeyHolder;
+import org.springframework.jdbc.support.KeyHolder;
+import org.springframework.stereotype.Repository;
+
 import java.lang.invoke.MethodHandles;
 import java.sql.Date;
 import java.sql.PreparedStatement;
@@ -13,12 +20,6 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.List;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.jdbc.core.JdbcTemplate;
-import org.springframework.jdbc.support.GeneratedKeyHolder;
-import org.springframework.jdbc.support.KeyHolder;
-import org.springframework.stereotype.Repository;
 
 @Repository
 public class HorseJdbcDao implements HorseDao {
@@ -36,6 +37,7 @@ public class HorseJdbcDao implements HorseDao {
       + " WHERE id = ?";
   private static final String SQL_INSERT = "INSERT INTO " + TABLE_NAME
       + " (name, description, date_of_birth, sex, owner_id) VALUES (?, ?, ?, ?, ?)";
+  private static final String SQL_DELETE = "DELETE FROM " + TABLE_NAME + " WHERE id = ?";
 
   private final JdbcTemplate jdbcTemplate;
 
@@ -118,6 +120,16 @@ public class HorseJdbcDao implements HorseDao {
         .setSex(newHorse.sex())
         .setOwnerId(newHorse.ownerId())
         ;
+  }
+
+  @Override
+  public void delete(long id) {
+    KeyHolder keyHolder = new GeneratedKeyHolder();
+    jdbcTemplate.update(connection -> {
+      PreparedStatement stmt = connection.prepareStatement(SQL_DELETE, Statement.RETURN_GENERATED_KEYS);
+      stmt.setLong(1, id);
+      return stmt;
+    }, keyHolder);
   }
 
 

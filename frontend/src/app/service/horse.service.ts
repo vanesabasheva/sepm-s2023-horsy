@@ -14,7 +14,8 @@ export class HorseService {
 
   constructor(
     private http: HttpClient,
-  ) { }
+  ) {
+  }
 
   /**
    * Get all horses stored in the system
@@ -48,5 +49,10 @@ export class HorseService {
       baseUri + '/' + id,
       horse
     );
+  }
+
+  deleteHorse(id: number): Observable<Horse> {
+    return this.http.delete<Horse>(baseUri + '/' + id);
+
   }
 }
