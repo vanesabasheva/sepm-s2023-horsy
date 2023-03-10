@@ -73,25 +73,33 @@ public class HorseJdbcDao implements HorseDao {
   @Override
   public Horse update(HorseDetailDto horse) throws NotFoundException {
     LOG.trace("update({})", horse);
-    int updated = jdbcTemplate.update(SQL_UPDATE,
-        horse.name(),
-        horse.description(),
-        horse.dateOfBirth(),
-        horse.sex().toString(),
-        horse.ownerId(),
-        horse.id());
+    KeyHolder keyHolder = new GeneratedKeyHolder();
+    int updated = jdbcTemplate.update(connection -> {
+      PreparedStatement stmt = connection.prepareStatement(SQL_UPDATE,
+          Statement.RETURN_GENERATED_KEYS);
+      stmt.setString(1, horse.name());
+      stmt.setString(2, horse.description());
+      stmt.setDate(3, Date.valueOf(horse.dateOfBirth()));
+      stmt.setString(4, horse.sex().toString());
+      if (horse.ownerId() != null) {
+        stmt.setLong(5, horse.ownerId());
+      } else {
+        stmt.setNull(5, java.sql.Types.NULL);
+      }
+      stmt.setLong(6, horse.id());
+      return stmt;
+    }, keyHolder);
+
     if (updated == 0) {
       throw new NotFoundException("Could not update horse with ID " + horse.id() + ", because it does not exist");
     }
-
     return new Horse()
         .setId(horse.id())
         .setName(horse.name())
         .setDescription(horse.description())
         .setDateOfBirth(horse.dateOfBirth())
         .setSex(horse.sex())
-        .setOwnerId(horse.ownerId())
-        ;
+        .setOwnerId(horse.ownerId());
   }
 
 
