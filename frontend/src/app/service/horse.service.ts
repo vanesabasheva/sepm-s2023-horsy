@@ -74,4 +74,20 @@ export class HorseService {
     return this.http.delete<Horse>(baseUri + '/' + id);
 
   }
+
+  searchByMotherName(name: string, limitTo: number): Observable<Horse[]> {
+    const params = new HttpParams()
+      .set('name', name)
+      .set('sex', 'FEMALE')
+      .set('limit', limitTo);
+    return this.http.get<Horse[]>(baseUri, {params});
+  }
+
+  searchByFatherName(name: string, limitTo: number): Observable<Horse[]> {
+    const params = new HttpParams()
+      .set('name', name)
+      .set('sex', 'MALE')
+      .set('limit', limitTo);
+    return this.http.get<Horse[]>(baseUri, {params});
+  }
 }
