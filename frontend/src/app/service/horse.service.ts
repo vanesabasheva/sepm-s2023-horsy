@@ -75,6 +75,13 @@ export class HorseService {
 
   }
 
+  /**
+   * Get a list of specific female horses stored in the system
+   *
+   * @param name the name/part of the name of the mother horse to get
+   * @param limitTo the number of horse suggestions to be showed
+   * @return an Observable list of found horses
+   */
   searchByMotherName(name: string, limitTo: number): Observable<Horse[]> {
     const params = new HttpParams()
       .set('name', name)
@@ -83,6 +90,13 @@ export class HorseService {
     return this.http.get<Horse[]>(baseUri, {params});
   }
 
+  /**
+   * Get a list of specific male horses stored in the system
+   *
+   * @param name the name/part of the name of the horse to get
+   * @param limitTo the number of horse suggestions to be showed
+   * @return an Observable list of found horses
+   */
   searchByFatherName(name: string, limitTo: number): Observable<Horse[]> {
     const params = new HttpParams()
       .set('name', name)
