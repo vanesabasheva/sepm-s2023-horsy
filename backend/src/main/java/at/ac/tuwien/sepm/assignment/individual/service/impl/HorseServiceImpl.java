@@ -56,26 +56,57 @@ public class HorseServiceImpl implements HorseService {
         .map(horse -> mapper.entityToListDto(horse, ownerMap));
   }
 
+  public HorseDetailDto[] getParents(Horse child) throws NotFoundException {
+    HorseDetailDto[] parents = new HorseDetailDto[2];
+    Horse mother;
+    Horse father;
+    HorseDetailDto motherDTO;
+    HorseDetailDto fatherDTO;
+
+    if (child.getMotherId() != null) {
+      mother = dao.getById(child.getMotherId());
+      motherDTO = mapper.entityToDetailDto(mother, ownerMapForSingleId(mother.getOwnerId()), null, null);
+    } else {
+      motherDTO = null;
+    }
+    if (child.getFatherId() != null) {
+      father = dao.getById(child.getFatherId());
+      fatherDTO = mapper.entityToDetailDto(father, ownerMapForSingleId(father.getOwnerId()), null, null);
+    } else {
+      fatherDTO = null;
+    }
+
+    parents[0] = motherDTO;
+    parents[1] = fatherDTO;
+    return parents;
+  }
+
 
   @Override
   public HorseDetailDto update(HorseDetailDto horse) throws NotFoundException, ValidationException, ConflictException {
     LOG.trace("update({})", horse);
     validator.validateForUpdate(horse);
     var updatedHorse = dao.update(horse);
+    var parents = getParents(updatedHorse);
     return mapper.entityToDetailDto(
         updatedHorse,
-        ownerMapForSingleId(updatedHorse.getOwnerId()));
+        ownerMapForSingleId(updatedHorse.getOwnerId()),
+        parents[0],
+        parents[1]);
   }
 
 
   @Override
-  public HorseDetailDto create(HorseDetailDto newHorse) {
+  public HorseDetailDto create(HorseDetailDto newHorse) throws NotFoundException {
     LOG.trace("create({}), service", newHorse);
     validator.validateForCreate(newHorse);
     var createdHorse = dao.create(newHorse);
+    var parents = getParents(createdHorse);
     return mapper.entityToDetailDto(
         createdHorse,
-        ownerMapForSingleId(createdHorse.getOwnerId()));
+        ownerMapForSingleId(createdHorse.getOwnerId()),
+        parents[0],
+        parents[1]);
   }
 
 
@@ -83,9 +114,12 @@ public class HorseServiceImpl implements HorseService {
   public HorseDetailDto getById(long id) throws NotFoundException {
     LOG.trace("details({})", id);
     Horse horse = dao.getById(id);
+    var parents = getParents(horse);
     return mapper.entityToDetailDto(
         horse,
-        ownerMapForSingleId(horse.getOwnerId()));
+        ownerMapForSingleId(horse.getOwnerId()),
+        parents[0],
+        parents[1]);
   }
 
   @Override

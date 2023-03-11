@@ -34,9 +34,11 @@ public class HorseJdbcDao implements HorseDao {
       + "  , date_of_birth = ?"
       + "  , sex = ?"
       + "  , owner_id = ?"
+      + "  , mother_id = ?"
+      + "  , father_id = ?"
       + " WHERE id = ?";
   private static final String SQL_INSERT = "INSERT INTO " + TABLE_NAME
-      + " (name, description, date_of_birth, sex, owner_id) VALUES (?, ?, ?, ?, ?)";
+      + " (name, description, date_of_birth, sex, owner_id, mother_id, father_id) VALUES (?, ?, ?, ?, ?, ?, ?)";
   private static final String SQL_DELETE = "DELETE FROM " + TABLE_NAME + " WHERE id = ?";
 
   private final JdbcTemplate jdbcTemplate;
@@ -86,7 +88,17 @@ public class HorseJdbcDao implements HorseDao {
       } else {
         stmt.setNull(5, java.sql.Types.NULL);
       }
-      stmt.setLong(6, horse.id());
+      if (horse.mother() != null) {
+        stmt.setLong(6, horse.motherId());
+      } else {
+        stmt.setNull(6, java.sql.Types.NULL);
+      }
+      if (horse.father() != null) {
+        stmt.setLong(7, horse.fatherId());
+      } else {
+        stmt.setNull(7, java.sql.Types.NULL);
+      }
+      stmt.setLong(8, horse.id());
       return stmt;
     }, keyHolder);
 
@@ -99,7 +111,9 @@ public class HorseJdbcDao implements HorseDao {
         .setDescription(horse.description())
         .setDateOfBirth(horse.dateOfBirth())
         .setSex(horse.sex())
-        .setOwnerId(horse.ownerId());
+        .setOwnerId(horse.ownerId())
+        .setMotherId(horse.motherId())
+        .setFatherId(horse.fatherId());
   }
 
 
@@ -118,6 +132,16 @@ public class HorseJdbcDao implements HorseDao {
       } else {
         stmt.setNull(5, java.sql.Types.NULL);
       }
+      if (newHorse.motherId() != null) {
+        stmt.setLong(6, newHorse.motherId());
+      } else {
+        stmt.setNull(6, java.sql.Types.NULL);
+      }
+      if (newHorse.fatherId() != null) {
+        stmt.setLong(7, newHorse.fatherId());
+      } else {
+        stmt.setNull(7, java.sql.Types.NULL);
+      }
       return stmt;
     }, keyHolder);
 
@@ -127,6 +151,8 @@ public class HorseJdbcDao implements HorseDao {
         .setDateOfBirth(newHorse.dateOfBirth())
         .setSex(newHorse.sex())
         .setOwnerId(newHorse.ownerId())
+        .setMotherId(newHorse.motherId())
+        .setFatherId(newHorse.fatherId())
         ;
   }
 

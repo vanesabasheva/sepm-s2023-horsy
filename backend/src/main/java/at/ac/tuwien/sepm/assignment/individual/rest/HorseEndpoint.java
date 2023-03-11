@@ -71,7 +71,7 @@ public class HorseEndpoint {
 
 
   @PostMapping
-  public HorseDetailDto create(@RequestBody HorseDetailDto toAdd) {
+  public HorseDetailDto create(@RequestBody HorseDetailDto toAdd) throws NotFoundException {
     LOG.info("PUT " + BASE_PATH + "/{}", toAdd);
     return service.create(toAdd);
   }

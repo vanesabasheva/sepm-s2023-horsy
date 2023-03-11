@@ -50,7 +50,7 @@ public interface HorseService {
    * @param newHorse the horse to add
    * @return the newly added horse
    */
-  HorseDetailDto create(HorseDetailDto newHorse);
+  HorseDetailDto create(HorseDetailDto newHorse) throws NotFoundException;
 
   /**
    * Deletes the Horse specified by an id.
