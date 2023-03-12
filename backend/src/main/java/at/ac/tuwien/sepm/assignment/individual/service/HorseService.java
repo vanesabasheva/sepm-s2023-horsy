@@ -20,7 +20,12 @@ public interface HorseService {
    */
   Stream<HorseListDto> allHorses();
 
-
+  /**
+   * Lists all horses stored in the system matching the given parameters.
+   *
+   * @param searchParameters the parameters of the horses to be listed
+   * @return list of all stored horses with the given parameters
+   */
   Stream<HorseListDto> allHorses(HorseSearchDto searchParameters);
 
 

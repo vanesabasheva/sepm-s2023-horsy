@@ -47,11 +47,17 @@ public interface HorseDao {
   Horse create(HorseDetailDto newHorse);
 
   /**
-   * Deletes a horse in the persistent data store.
+   * Deletes a horse from the persistent data store.
    *
    * @param id the id of the horse to delete
    */
   void delete(long id);
 
+  /**
+   * Get all horses stored in the persistent data store matching the given parameters
+   *
+   * @param requestParameters the parameters that the horses need to have
+   * @return a list of all stored horses matching the given parameters
+   */
   List<Horse> search(HorseSearchDto requestParameters);
 }
