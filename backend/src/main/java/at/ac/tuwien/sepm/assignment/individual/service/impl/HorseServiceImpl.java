@@ -2,6 +2,7 @@ package at.ac.tuwien.sepm.assignment.individual.service.impl;
 
 import at.ac.tuwien.sepm.assignment.individual.dto.HorseDetailDto;
 import at.ac.tuwien.sepm.assignment.individual.dto.HorseListDto;
+import at.ac.tuwien.sepm.assignment.individual.dto.HorseSearchDto;
 import at.ac.tuwien.sepm.assignment.individual.dto.OwnerDto;
 import at.ac.tuwien.sepm.assignment.individual.entity.Horse;
 import at.ac.tuwien.sepm.assignment.individual.exception.ConflictException;
@@ -17,6 +18,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
 import java.lang.invoke.MethodHandles;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.Map;
 import java.util.Objects;
@@ -42,6 +44,23 @@ public class HorseServiceImpl implements HorseService {
   public Stream<HorseListDto> allHorses() {
     LOG.trace("allHorses()");
     var horses = dao.getAll();
+    var ownerIds = horses.stream()
+        .map(Horse::getOwnerId)
+        .filter(Objects::nonNull)
+        .collect(Collectors.toUnmodifiableSet());
+    Map<Long, OwnerDto> ownerMap;
+    try {
+      ownerMap = ownerService.getAllById(ownerIds);
+    } catch (NotFoundException e) {
+      throw new FatalException("Horse, that is already persisted, refers to non-existing owner", e);
+    }
+    return horses.stream()
+        .map(horse -> mapper.entityToListDto(horse, ownerMap));
+  }
+
+  public Stream<HorseListDto> allHorses(HorseSearchDto requestParameters) {
+    Collection<Horse> horses;
+    horses = dao.search(requestParameters);
     var ownerIds = horses.stream()
         .map(Horse::getOwnerId)
         .filter(Objects::nonNull)

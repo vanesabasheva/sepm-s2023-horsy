@@ -1,6 +1,7 @@
 package at.ac.tuwien.sepm.assignment.individual.persistence.impl;
 
 import at.ac.tuwien.sepm.assignment.individual.dto.HorseDetailDto;
+import at.ac.tuwien.sepm.assignment.individual.dto.HorseSearchDto;
 import at.ac.tuwien.sepm.assignment.individual.entity.Horse;
 import at.ac.tuwien.sepm.assignment.individual.exception.FatalException;
 import at.ac.tuwien.sepm.assignment.individual.exception.NotFoundException;
@@ -19,6 +20,7 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
+import java.util.ArrayList;
 import java.util.List;
 
 @Repository
@@ -40,6 +42,8 @@ public class HorseJdbcDao implements HorseDao {
   private static final String SQL_INSERT = "INSERT INTO " + TABLE_NAME
       + " (name, description, date_of_birth, sex, owner_id, mother_id, father_id) VALUES (?, ?, ?, ?, ?, ?, ?)";
   private static final String SQL_DELETE = "DELETE FROM " + TABLE_NAME + " WHERE id = ?";
+  private static final String SQL_SELECT_SEARCH_PARENTS = "SELECT * FROM " + TABLE_NAME
+      + " WHERE UPPER(name) like UPPER('%'||COALESCE(?, '')||'%') AND sex = ? LIMIT ?";
 
   private final JdbcTemplate jdbcTemplate;
 
@@ -52,6 +56,16 @@ public class HorseJdbcDao implements HorseDao {
   public List<Horse> getAll() {
     LOG.trace("getAll()");
     return jdbcTemplate.query(SQL_SELECT_ALL, this::mapRow);
+  }
+
+  @Override
+  public List<Horse> search(HorseSearchDto requestParameters) {
+    var query = SQL_SELECT_SEARCH_PARENTS;
+    var params = new ArrayList<>();
+    params.add(requestParameters.name());
+    params.add(requestParameters.sex().toString());
+    params.add(requestParameters.limit());
+    return jdbcTemplate.query(query, this::mapRow, params.toArray());
   }
 
   @Override

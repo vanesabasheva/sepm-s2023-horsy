@@ -1,6 +1,7 @@
 package at.ac.tuwien.sepm.assignment.individual.persistence;
 
 import at.ac.tuwien.sepm.assignment.individual.dto.HorseDetailDto;
+import at.ac.tuwien.sepm.assignment.individual.dto.HorseSearchDto;
 import at.ac.tuwien.sepm.assignment.individual.entity.Horse;
 import at.ac.tuwien.sepm.assignment.individual.exception.NotFoundException;
 
@@ -44,11 +45,13 @@ public interface HorseDao {
    * @return the newly added horse
    */
   Horse create(HorseDetailDto newHorse);
-  
+
   /**
    * Deletes a horse in the persistent data store.
    *
    * @param id the id of the horse to delete
    */
   void delete(long id);
+
+  List<Horse> search(HorseSearchDto requestParameters);
 }
