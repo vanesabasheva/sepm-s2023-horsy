@@ -51,6 +51,7 @@ export class HorseDetailComponent implements OnInit {
   deleteHorse(id: number) {
     this.service.deleteHorse(id).subscribe({
       next: data => {
+        this.notification.success(`Horse ${this.horse.name} successfully deleted`);
         this.router.navigate(['/horses'], {state: {del: 'true'}}).then(r => {
           if (!r) {
             this.showError('Router failed');
