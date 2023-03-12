@@ -60,6 +60,7 @@ public class HorseJdbcDao implements HorseDao {
 
   @Override
   public List<Horse> search(HorseSearchDto requestParameters) {
+    LOG.trace("search({})", requestParameters);
     var query = SQL_SELECT_SEARCH_PARENTS;
     var params = new ArrayList<>();
     params.add(requestParameters.name());

@@ -59,6 +59,7 @@ public class HorseServiceImpl implements HorseService {
   }
 
   public Stream<HorseListDto> allHorses(HorseSearchDto requestParameters) {
+    LOG.trace("allHorses({}}), service", requestParameters);
     Collection<Horse> horses;
     horses = dao.search(requestParameters);
     var ownerIds = horses.stream()
