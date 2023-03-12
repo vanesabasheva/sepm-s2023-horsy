@@ -162,6 +162,14 @@ export class HorseCreateEditComponent implements OnInit {
     }
   }
 
+  goToDetailPage(horse: Horse) {
+    this.router.navigate(['/horses/' + horse.id]).then(r => {
+      if (!r) {
+        this.showError('Router failed');
+      }
+    });
+  }
+
   private getHorse(id: number) {
     this.service.getByID(id).subscribe({
       next: (data: Horse) => {

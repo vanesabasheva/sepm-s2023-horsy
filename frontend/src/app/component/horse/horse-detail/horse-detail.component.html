@@ -1,0 +1,147 @@
+<div>
+  <h1 class="display-1">Details of Horse</h1>
+  <div class="float-end" id="editButton">
+    <button class="btn btn-sm responsive-warning-button"
+            type="button"
+            name="editButton"
+            [routerLink]="['edit']"
+    >
+      <i class="bi bi-pen"></i>
+      Edit
+    </button>
+  </div>
+</div>
+
+<form>
+  <div class="row">
+    <!-- Start name and date of birth row -->
+    <div class="mb-2 col-lg-6">
+      <!-- When nesting rows, always make row > col-* > row. The Bootstrap classes do not work right when an element is both col* and row -->
+      <div class="row">
+        <label class="col-form-label text-md-end text-muted col-md-2 col-lg-4">
+          Name
+        </label>
+        <div class="col-md-10 col-lg-8"
+        >
+          <td class="form-control form-control-plaintext">
+            {{horse.name}}
+          </td>
+        </div>
+      </div>
+    </div>
+    <div class="mb-2 col-lg-6">
+      <div class="row">
+        <label class="col-form-label text-md-end text-muted col-md-12 col-lg-4 text-end">
+          Date of Birth
+        </label>
+        <div class="col-md-10 col-lg-8"
+        >
+          <td class="form-control form-control-plaintext">
+            {{dateOfBirthAsLocaleDate(horse)}}
+          </td>
+        </div>
+      </div>
+    </div>
+    <!-- End name and date of birth row -->
+  </div>
+
+  <div class="row">
+    <!-- Start sex and owner row -->
+    <div class="mb-2 col-lg-6">
+      <div class="row">
+        <label class="col-form-label text-md-end text-muted col-md-2 col-lg-4">
+          Sex
+        </label>
+        <div class="col-md-10 col-lg-8"
+        >
+          <td class="form-control form-control-plaintext">
+            {{horse.sex}}
+          </td>
+        </div>
+      </div>
+    </div>
+
+    <div class="mb-2 col-lg-6">
+      <div class="row">
+        <label class="col-form-label text-md-end text-muted col-md-2 col-lg-4">
+          Owner
+        </label>
+        <div class="col-md-10 col-lg-8"
+        >
+          <tr *ngIf="horse.owner !== null">
+            <td class="form-control form-control-plaintext">
+              {{this.formatOwnerName(horse.owner)}}
+            </td>
+          </tr>
+        </div>
+      </div>
+    </div>
+    <!-- End sex and owner row -->
+  </div>
+
+  <div class="row">
+    <!-- Start mother and father row -->
+    <div class="mb-2 col-lg-6">
+      <div class="row">
+        <label class="col-form-label text-md-end text-muted col-md-2 col-lg-4">
+          Mother
+        </label>
+        <div class="col-md-10 col-lg-8"
+        >
+          <tr *ngIf="horse.mother && horse.mother.name !== undefined">
+            <td class="form-control form-control-plaintext border-hover p-2"
+                name="goToMotherButton" type="button"
+                (click)="goToHorse(horse.mother)"
+            >
+              {{horse.mother.name}}
+            </td>
+          </tr>
+        </div>
+      </div>
+    </div>
+
+    <div class="mb-2 col-lg-6">
+      <div class="row">
+        <label class="col-form-label text-md-end text-muted col-md-2 col-lg-4 text-end">
+          Father
+        </label>
+        <div class="col-md-10 col-lg-8"
+        >
+          <tr *ngIf="horse.father && horse.father.name !== undefined">
+            <td class="form-control form-control-plaintext border-hover p-2"
+                name="goToFatherButton" type="button"
+                (click)="goToHorse(horse.father)">
+              {{horse.father.name}}
+            </td>
+          </tr>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <div class="row">
+    <!-- No row and col-* here. We want this to always span the whole width. -->
+    <label class="col-form-label text-md-end text-md-end text-muted col-md-2">
+      Description
+    </label>
+    <div class="col-md-10"
+    >
+      <tr *ngIf="horse.description !== null">
+        <td class="form-control form-control-plaintext">
+          {{horse.description}}
+        </td>
+      </tr>
+    </div>
+  </div>
+
+  <div class="mt-4 d-flex flex-row">
+    <button type="button"
+            class="btn btn-danger"
+            (click)="deleteHorse(horse.id)"
+    >
+      <i class="bi bi-trash"></i>
+      Delete
+    </button>
+  </div>
+</form>
