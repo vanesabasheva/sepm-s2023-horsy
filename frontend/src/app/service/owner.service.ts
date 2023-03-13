@@ -21,4 +21,14 @@ export class OwnerService {
       .set('maxAmount', limitTo);
     return this.http.get<Owner[]>(baseUri, { params });
   }
+
+  /**
+   * Get all owners stored in the system
+   *
+   * @return observable list of found owners.
+   */
+
+  getAll(): Observable<Owner[]> {
+    return this.http.get<Owner[]>(baseUri);
+  }
 }
