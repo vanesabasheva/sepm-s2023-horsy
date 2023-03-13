@@ -61,7 +61,11 @@ public class HorseServiceImpl implements HorseService {
   public Stream<HorseListDto> allHorses(HorseSearchDto requestParameters) {
     LOG.trace("allHorses({}}), service", requestParameters);
     Collection<Horse> horses;
-    horses = dao.search(requestParameters);
+    if (requestParameters.ownerName() == null) {
+      horses = dao.search(requestParameters);
+    } else {
+      horses = dao.getAll(requestParameters);
+    }
     var ownerIds = horses.stream()
         .map(Horse::getOwnerId)
         .filter(Objects::nonNull)

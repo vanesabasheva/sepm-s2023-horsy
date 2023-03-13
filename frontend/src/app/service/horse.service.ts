@@ -3,7 +3,6 @@ import {Injectable} from '@angular/core';
 import {Observable} from 'rxjs';
 import {environment} from 'src/environments/environment';
 import {Horse} from '../dto/horse';
-import {Sex} from '../dto/sex';
 
 const baseUri = environment.backendUrl + '/horses';
 
@@ -102,6 +101,15 @@ export class HorseService {
       .set('name', name)
       .set('sex', 'MALE')
       .set('limit', limitTo);
+    return this.http.get<Horse[]>(baseUri, {params});
+  }
+
+  /**
+   * Get all horses stored in the system matching the parameters
+   *
+   * @return observable list of the found horses.
+   */
+  getHorsesByParameters(params: HttpParams): Observable<Horse[]> {
     return this.http.get<Horse[]>(baseUri, {params});
   }
 }

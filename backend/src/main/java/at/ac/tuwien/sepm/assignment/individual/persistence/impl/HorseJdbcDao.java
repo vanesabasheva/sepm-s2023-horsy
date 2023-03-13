@@ -20,6 +20,7 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
+import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -44,6 +45,11 @@ public class HorseJdbcDao implements HorseDao {
   private static final String SQL_DELETE = "DELETE FROM " + TABLE_NAME + " WHERE id = ?";
   private static final String SQL_SELECT_SEARCH_PARENTS = "SELECT * FROM " + TABLE_NAME
       + " WHERE UPPER(name) like UPPER('%'||COALESCE(?, '')||'%') AND sex = ? LIMIT ?";
+  private static final String SQL_SELECT_SEARCH = "SELECT * FROM " + TABLE_NAME
+      + " LEFT JOIN owner ON horse.owner_id = owner.id"
+      + " WHERE UPPER(name) like UPPER('%'||COALESCE(?, '')||'%')"
+      + " AND sex IN( COALESCE(?,'MALE'), COALESCE(?, 'FEMALE') )"
+      + " AND date_of_birth <= ?";
 
   private final JdbcTemplate jdbcTemplate;
 
@@ -66,6 +72,29 @@ public class HorseJdbcDao implements HorseDao {
     params.add(requestParameters.sex().toString());
     params.add(requestParameters.limit());
     var query = SQL_SELECT_SEARCH_PARENTS;
+    return jdbcTemplate.query(query, this::mapRow, params.toArray());
+  }
+
+  @Override
+  public List<Horse> getAll(HorseSearchDto parameters) {
+    LOG.trace("getAll({}), persistence", parameters);
+    var query = SQL_SELECT_SEARCH;
+    var params = new ArrayList<>();
+    params.add(parameters.name());
+    var sexParameter = parameters.sex() == null ? null : parameters.sex().toString();
+    params.add(sexParameter);
+    params.add(sexParameter);
+    LocalDate bornBeforeParameter = parameters.bornBefore() == null ? LocalDate.now() : parameters.bornBefore();
+    params.add(bornBeforeParameter);
+
+    if (parameters.description() != "") {
+      query += " AND UPPER(description) like UPPER('%'||COALESCE(?, '')||'%')";
+      params.add(parameters.description());
+    }
+    if (parameters.ownerName() != "") {
+      query += " AND CONCAT(CONCAT(UPPER(owner.first_name), ' '), UPPER(owner.last_name)) like UPPER('%'||COALESCE(?, '')||'%');";
+      params.add(parameters.ownerName());
+    }
     return jdbcTemplate.query(query, this::mapRow, params.toArray());
   }
 

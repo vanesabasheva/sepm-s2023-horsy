@@ -60,4 +60,12 @@ public interface HorseDao {
    * @return a list of all stored horses matching the given parameters
    */
   List<Horse> search(HorseSearchDto requestParameters);
+
+  /**
+   * Get all horses stored in the persistent data store that match the given parameters.
+   *
+   * @param parameters search parameters
+   * @return a list of all stored horses matching the parameters
+   */
+  List<Horse> getAll(HorseSearchDto parameters);
 }

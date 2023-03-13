@@ -21,6 +21,8 @@
     </label>
     <input type="text" name="searchHorseName"
            class="form-control"
+           (input)="searchHorses()"
+           [(ngModel)]=searchName
            >
   </div>
   <div class="flex-grow-1 ms-1">
@@ -29,6 +31,8 @@
     </label>
     <input type="text" name="searchHorseDescription"
            class="form-control"
+           (input)="searchHorses()"
+           [(ngModel)]=searchHorseDescription
            >
   </div>
   <div class="ms-1">
@@ -42,6 +46,8 @@
            pattern="\d{4}-\d{2}-\d{2}"
            placeholder="yyyy-mm-dd"
            class="form-control"
+           (input)="searchHorses()"
+           [(ngModel)]=searchHorseDateOfBirth
            >
   </div>
   <div class="ms-1">
@@ -50,8 +56,10 @@
     </label>
     <select name="searchHorseSex"
             class="form-select"
+            (change)="searchHorses()"
+            [(ngModel)]=searchSex
             >
-      <option></option>
+      <option [ngValue]="undefined" disabled selected>Select Sex</option>
       <option value="FEMALE">Female</option>
       <option value="MALE">Male</option>
     </select>
@@ -60,11 +68,12 @@
     <label for="searchHorseOwner" class="col-form-label">
       Owner
     </label>
-    <app-autocomplete name="searchHorseOwner"
-                      textInputClass="form-control"
-                      valueNeedsToMatchSuggestion="false"
-                      >
-    </app-autocomplete>
+    <input name="searchHorseOwner"
+           class="form-control"
+           type="text"
+           (input)="searchHorses()"
+           [(ngModel)]=searchOwner
+    >
   </div>
 </form>
 
@@ -96,6 +105,11 @@
                [routerLink]="[horse.id, 'edit']"
                aria-label="Edit horse">
               <i class="bi bi-pencil"></i>
+            </a>
+            <a class="btn btn-sm responsive-danger-button"
+               aria-label="Delete horse"
+               (click)="deleteHorse(horse.id)">
+              <i class="bi bi-trash"></i>
             </a>
           </div>
         </td>
