@@ -37,6 +37,7 @@ public class OwnerEndpoint {
   @PostMapping
   @RequestMapping
   public OwnerDto create(@RequestBody OwnerCreateDto newOwner) throws ValidationException {
+    LOG.info("POST" + BASE_PATH + "/{}", newOwner);
     return service.create(newOwner);
   }
 }
