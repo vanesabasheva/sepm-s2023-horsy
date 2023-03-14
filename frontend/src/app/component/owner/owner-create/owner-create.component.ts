@@ -52,6 +52,7 @@ export class OwnerCreateComponent implements OnInit {
       const observable = this.service.create(this.owner);
       observable.subscribe({
         next: data => {
+          this.notification.success(`Owner ${this.owner.firstName} successfully added.`);
           this.router.navigate(['/owners']);
         },
         error: error => {
