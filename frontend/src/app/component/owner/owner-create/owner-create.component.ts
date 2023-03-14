@@ -3,7 +3,7 @@ import {Owner} from '../../../dto/owner';
 import {OwnerService} from '../../../service/owner.service';
 import {ActivatedRoute, Router} from '@angular/router';
 import {ToastrService} from 'ngx-toastr';
-import {NgModel} from '@angular/forms';
+import {NgForm, NgModel} from '@angular/forms';
 
 @Component({
   selector: 'app-owner-create',
@@ -41,5 +41,24 @@ export class OwnerCreateComponent implements OnInit {
   ngOnInit(): void {
     this.route.data.subscribe(data => {
     });
+  }
+
+  public onSubmit(form: NgForm): void {
+    console.log('is form valid?', form.valid, this.owner);
+    if (form.valid) {
+      if (this.owner.email === '') {
+        delete this.owner.email;
+      }
+      const observable = this.service.create(this.owner);
+      observable.subscribe({
+        next: data => {
+          this.router.navigate(['/owners']);
+        },
+        error: error => {
+          console.error(`Error for adding owner`, error);
+          // TODO show an error message to the user. Include and sensibly present the info from the backend!
+        }
+      });
+    }
   }
 }

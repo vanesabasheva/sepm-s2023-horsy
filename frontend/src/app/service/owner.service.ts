@@ -31,4 +31,11 @@ export class OwnerService {
   getAll(): Observable<Owner[]> {
     return this.http.get<Owner[]>(baseUri);
   }
+
+  create(owner: Owner): Observable<Owner> {
+    return this.http.post<Owner>(
+      baseUri,
+      owner
+    );
+  }
 }
