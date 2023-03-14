@@ -1,1 +1,83 @@
+<form #form="ngForm" (ngSubmit)="onSubmit(form)">
+  <div class="row">
+    <!-- Start first name and last name row -->
+    <div class="mb-2 col-lg-6">
+      <!-- When nesting rows, always make row > col-* > row. The Bootstrap classes do not work right when an element is both col* and row -->
+      <div class="row">
+        <label for="firstName" class="col-form-label text-md-end text-muted col-md-2 col-lg-4">
+          First Name
+        </label>
+        <div class="col-md-10 col-lg-8"
+        >
+          <input type="text"
+                 id="firstName"
+                 name="firstName"
+                 placeholder="First name"
+                 class="form-control"
+                 [class]="dynamicCssClassesForInput(ownerNameModel)"
+                 [(ngModel)]="owner.firstName"
+                 #ownerNameModel="ngModel"
+                 required
+          >
+          <div class="invalid-feedback">
+            <!-- This is shown, when the form validation deems the name input to be invalid -->
+            Name is required
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="mb-2 col-lg-6">
+      <!-- When nesting rows, always make row > col-* > row. The Bootstrap classes do not work right when an element is both col* and row -->
+      <div class="row">
+        <label for="firstName" class="col-form-label text-md-end text-muted col-md-2 col-lg-4">
+          Last Name
+        </label>
+        <div class="col-md-10 col-lg-8"
+        >
+          <input type="text"
+                 id="lastName"
+                 name="lastName"
+                 placeholder="Last name"
+                 class="form-control"
+                 [class]="dynamicCssClassesForInput(ownerNameModel)"
+                 [(ngModel)]="owner.lastName"
+                 #ownerNameModel="ngModel"
+                 required
+          >
+          <div class="invalid-feedback">
+            <!-- This is shown, when the form validation deems the name input to be invalid -->
+            Last Name is required
+          </div>
+        </div>
+      </div>
+    </div>
+    <!-- End first name and last name row -->
+  </div>
 
+  <div class="row">
+    <!-- No row and col-* here. We want this to always span the whole width. -->
+    <label for="email" class="col-form-label text-md-end text-md-end text-muted col-md-2">
+      E-Mail
+    </label>
+    <div class="col-md-10"
+    >
+      <textarea class="form-control"
+                id="email"
+                name="email"
+                [(ngModel)]="owner.email"
+      >
+      </textarea>
+    </div>
+  </div>
+
+  <div class="mt-4 d-flex flex-row">
+    <span class="flex-grow-1"></span>
+    <button type="submit"
+            class="btn btn-primary"
+            [disabled]="!form.valid"
+            type="submit"
+    >
+      {{submitButtonText}}
+    </button>
+  </div>
+</form>
