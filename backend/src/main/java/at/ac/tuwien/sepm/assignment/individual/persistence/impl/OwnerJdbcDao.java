@@ -5,7 +5,16 @@ import at.ac.tuwien.sepm.assignment.individual.dto.OwnerSearchDto;
 import at.ac.tuwien.sepm.assignment.individual.entity.Owner;
 import at.ac.tuwien.sepm.assignment.individual.exception.FatalException;
 import at.ac.tuwien.sepm.assignment.individual.exception.NotFoundException;
+import at.ac.tuwien.sepm.assignment.individual.exception.PersistenceException;
 import at.ac.tuwien.sepm.assignment.individual.persistence.OwnerDao;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.dao.DataAccessException;
+import org.springframework.jdbc.core.JdbcTemplate;
+import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
+import org.springframework.jdbc.support.GeneratedKeyHolder;
+import org.springframework.stereotype.Repository;
+
 import java.lang.invoke.MethodHandles;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
@@ -15,12 +24,6 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.jdbc.core.JdbcTemplate;
-import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
-import org.springframework.jdbc.support.GeneratedKeyHolder;
-import org.springframework.stereotype.Repository;
 
 @Repository
 public class OwnerJdbcDao implements OwnerDao {
@@ -43,65 +46,81 @@ public class OwnerJdbcDao implements OwnerDao {
 
 
   @Override
-  public Owner getById(long id) throws NotFoundException {
+  public Owner getById(long id) throws NotFoundException, PersistenceException {
     LOG.trace("getById({})", id);
-    List<Owner> owners = jdbcTemplate.query(SQL_SELECT_BY_ID, this::mapRow, id);
-    if (owners.isEmpty()) {
-      throw new NotFoundException("Owner with ID %d not found".formatted(id));
+    try {
+      List<Owner> owners = jdbcTemplate.query(SQL_SELECT_BY_ID, this::mapRow, id);
+      if (owners.isEmpty()) {
+        throw new NotFoundException("Owner with ID %d not found".formatted(id));
+      }
+      if (owners.size() > 1) {
+        // If this happens, something is wrong with either the DB or the select
+        throw new FatalException("Found more than one owner with ID %d".formatted(id));
+      }
+      return owners.get(0);
+    } catch (DataAccessException e) {
+      throw new PersistenceException(e.getMessage(), e);
     }
-    if (owners.size() > 1) {
-      // If this happens, something is wrong with either the DB or the select
-      throw new FatalException("Found more than one owner with ID %d".formatted(id));
-    }
-    return owners.get(0);
   }
 
   @Override
-  public Owner create(OwnerCreateDto newOwner) {
+  public Owner create(OwnerCreateDto newOwner) throws PersistenceException {
     LOG.trace("create({})", newOwner);
 
-    GeneratedKeyHolder keyHolder = new GeneratedKeyHolder();
-    jdbcTemplate.update(con -> {
-      PreparedStatement stmt = con.prepareStatement(SQL_CREATE, Statement.RETURN_GENERATED_KEYS);
-      stmt.setString(1, newOwner.firstName());
-      stmt.setString(2, newOwner.lastName());
-      stmt.setString(3, newOwner.email());
-      return stmt;
-    }, keyHolder);
+    try {
+      GeneratedKeyHolder keyHolder = new GeneratedKeyHolder();
+      jdbcTemplate.update(con -> {
+        PreparedStatement stmt = con.prepareStatement(SQL_CREATE, Statement.RETURN_GENERATED_KEYS);
+        stmt.setString(1, newOwner.firstName());
+        stmt.setString(2, newOwner.lastName());
+        stmt.setString(3, newOwner.email());
+        return stmt;
+      }, keyHolder);
 
-    Number key = keyHolder.getKey();
-    if (key == null) {
-      // This should never happen. If it does, something is wrong with the DB or the way the prepared statement is set up.
-      throw new FatalException("Could not extract key for newly created owner. There is probably a programming error…");
+      Number key = keyHolder.getKey();
+      if (key == null) {
+        // This should never happen. If it does, something is wrong with the DB or the way the prepared statement is set up.
+        throw new FatalException("Could not extract key for newly created owner. There is probably a programming error…");
+      }
+
+      return new Owner()
+          .setId(key.longValue())
+          .setFirstName(newOwner.firstName())
+          .setLastName(newOwner.lastName())
+          .setEmail(newOwner.email())
+          ;
+    } catch (DataAccessException e) {
+      throw new PersistenceException(e.getMessage(), e);
     }
-
-    return new Owner()
-        .setId(key.longValue())
-        .setFirstName(newOwner.firstName())
-        .setLastName(newOwner.lastName())
-        .setEmail(newOwner.email())
-        ;
   }
 
   @Override
-  public Collection<Owner> getAllById(Collection<Long> ids) {
+  public Collection<Owner> getAllById(Collection<Long> ids) throws PersistenceException {
     LOG.trace("getAllById({})", ids);
-    var statementParams = Collections.singletonMap("ids", ids);
-    return jdbcNamed.query(SQL_SELECT_ALL, statementParams, this::mapRow);
+    try {
+      var statementParams = Collections.singletonMap("ids", ids);
+      return jdbcNamed.query(SQL_SELECT_ALL, statementParams, this::mapRow);
+    } catch (DataAccessException e) {
+      throw new PersistenceException(e.getMessage(), e);
+    }
   }
 
   @Override
-  public Collection<Owner> search(OwnerSearchDto searchParameters) {
+  public Collection<Owner> search(OwnerSearchDto searchParameters) throws PersistenceException {
     LOG.trace("search({})", searchParameters);
-    var query = SQL_SELECT_SEARCH;
-    var params = new ArrayList<>();
-    params.add(searchParameters.name());
-    var maxAmount = searchParameters.maxAmount();
-    if (maxAmount != null) {
-      query += SQL_SELECT_SEARCH_LIMIT_CLAUSE;
-      params.add(maxAmount);
+    try {
+      var query = SQL_SELECT_SEARCH;
+      var params = new ArrayList<>();
+      params.add(searchParameters.name());
+      var maxAmount = searchParameters.maxAmount();
+      if (maxAmount != null) {
+        query += SQL_SELECT_SEARCH_LIMIT_CLAUSE;
+        params.add(maxAmount);
+      }
+      return jdbcTemplate.query(query, this::mapRow, params.toArray());
+    } catch (DataAccessException e) {
+      throw new PersistenceException(e.getMessage(), e);
     }
-    return jdbcTemplate.query(query, this::mapRow, params.toArray());
   }
 
   private Owner mapRow(ResultSet resultSet, int i) throws SQLException {
