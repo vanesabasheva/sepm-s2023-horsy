@@ -93,6 +93,7 @@ export class HorseFamilyTreeComponent implements OnInit {
   deleteHorse(id: number) {
     this.service.deleteHorse(id).subscribe({
       next: data => {
+        this.notification.success(`Horse successfully deleted`);
         this.reloadHorses();
       },
       error: error => {
@@ -110,6 +111,7 @@ export class HorseFamilyTreeComponent implements OnInit {
         },
         error: error => {
           console.error('Error getting family tree of horse', error);
+          this.notification.error(error.message, 'Could Not Horse Family Tree');
           const errorMessage = error.status === 0
             ? 'Is the backend up?'
             : error.message.message;
@@ -124,6 +126,7 @@ export class HorseFamilyTreeComponent implements OnInit {
       },
       error: (error: any) => {
         console.error('Error getting family tree', error);
+        this.showError('Failed to get the family tree of the horse: ' + error.error.message);
       }
     });
   }
