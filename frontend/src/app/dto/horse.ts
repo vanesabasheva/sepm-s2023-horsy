@@ -17,3 +17,12 @@ export interface HorseSearch {
   name?: string;
   // TODO fill in missing fields
 }
+
+export interface HorseFamilyTree {
+  id?: number;
+  name: string;
+  dateOfBirth: Date;
+  sex: Sex;
+  motherId?: number;
+  fatherId?: number;
+}

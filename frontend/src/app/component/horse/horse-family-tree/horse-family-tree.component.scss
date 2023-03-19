@@ -1,0 +1,18 @@
+.custom-accordion .accordion-button:not(.collapsed) {
+  background-color: #f0f0f0;
+  color: #212529;
+}
+.custom-accordion .accordion-button:not(.collapsed)::after {
+  background-color: #f0f0f0;
+  color: #212529;
+}
+.custom-accordion .accordion-button.collapsed {
+  background-color: transparent;
+  color: #212529;
+}
+.custom-accordion .accordion-button.collapsed::after {
+  background-color: transparent;
+  color: #212529;
+}
+
+

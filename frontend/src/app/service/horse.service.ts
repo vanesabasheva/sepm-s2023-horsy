@@ -2,7 +2,7 @@ import {HttpClient, HttpParams} from '@angular/common/http';
 import {Injectable} from '@angular/core';
 import {Observable} from 'rxjs';
 import {environment} from 'src/environments/environment';
-import {Horse} from '../dto/horse';
+import {Horse, HorseFamilyTree} from '../dto/horse';
 
 const baseUri = environment.backendUrl + '/horses';
 
@@ -111,5 +111,12 @@ export class HorseService {
    */
   getHorsesByParameters(params: HttpParams): Observable<Horse[]> {
     return this.http.get<Horse[]>(baseUri, {params});
+  }
+
+  getFamilyTree(id: number, limit: number): Observable<HorseFamilyTree[]> {
+    const params = new HttpParams()
+      .set('id', id)
+      .set('generations', limit);
+    return this.http.get<HorseFamilyTree[]>(baseUri + '/' + id + '/familytree', {params});
   }
 }

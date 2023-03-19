@@ -1,0 +1,64 @@
+<h1 class="display-1">Family Tree</h1>
+
+<div class="d-flex flex-row" id="generations" style="margin-bottom: 30px; margin-top: 30px">
+  <button aria-label="load family tree"
+          class="btn btn-primary mr-1"
+          style="width:90px"
+          (click)="setGenerations()">
+    <i class="bi bi-arrow-clockwise"></i>
+    load
+  </button>
+  <input class="form-control"
+         id="gen" min="1"
+         step="1"
+         style="width: 350px"
+         [(ngModel)]="limit"
+         type="number">
+</div>
+
+<ng-template #recursiveAccordionBootstrap let-horse let-index="index">
+  <div *ngIf="horse">
+    <div class="accordion accordion-flush custom-accordion" [id]="'accordion-' + index">
+      <div class="accordion-item">
+        <h2 class="accordion-header" [id]="'heading-' + index">
+          <button class="accordion-button" type="button" [attr.data-bs-toggle]="'collapse'"
+                  [attr.data-bs-target]="'#collapse-' + index"
+                  [attr.aria-expanded]="true" [attr.aria-controls]="'collapse-' + index">
+
+            {{horse.name}}
+            <div class="btn-group">
+              <a class="btn btn-sm responsive-info-button"
+                 (click)="goToHorseDetails(horse.id)"
+                 aria-label="Show horse details">
+                <i class="bi bi-info-lg"></i>
+              </a>
+              <a class="btn btn-sm responsive-warning-button"
+                 (click)="goToHorseEdit(horse.id)"
+                 aria-label="Edit horse">
+                <i class="bi bi-pencil"></i>
+              </a>
+              <a class="btn btn-sm responsive-danger-button"
+                 aria-label="Delete horse"
+                 (click)="deleteHorse(horse.id)">
+                <i class="bi bi-trash"></i>
+              </a>
+            </div>
+          </button>
+        </h2>
+        <div [id]="'collapse-' + index" class="accordion-collapse collapse show"
+             [attr.aria-labelledby]="'heading-' + index"
+             [attr.data-bs-parent]="'#accordion-' + index">
+          <div class="accordion-body">
+            <ng-container
+              *ngTemplateOutlet="recursiveAccordionBootstrap; context:{$implicit: getById(horse.motherId), index: index + '-mother'}"></ng-container>
+            <ng-container
+              *ngTemplateOutlet="recursiveAccordionBootstrap; context:{$implicit: getById(horse.fatherId), index: index + '-father'}"></ng-container>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</ng-template>
+
+<ng-container *ngTemplateOutlet="recursiveAccordionBootstrap; context:{$implicit: horses[0]}"></ng-container>
+
