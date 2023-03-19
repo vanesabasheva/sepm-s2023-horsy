@@ -6,6 +6,7 @@ import at.ac.tuwien.sepm.assignment.individual.dto.HorseListDto;
 import at.ac.tuwien.sepm.assignment.individual.dto.HorseSearchDto;
 import at.ac.tuwien.sepm.assignment.individual.exception.ConflictException;
 import at.ac.tuwien.sepm.assignment.individual.exception.NotFoundException;
+import at.ac.tuwien.sepm.assignment.individual.exception.ServiceException;
 import at.ac.tuwien.sepm.assignment.individual.exception.ValidationException;
 
 import java.util.stream.Stream;
@@ -19,7 +20,7 @@ public interface HorseService {
    *
    * @return list of all stored horses
    */
-  Stream<HorseListDto> allHorses();
+  Stream<HorseListDto> allHorses() throws ServiceException;
 
   /**
    * Lists all horses stored in the system matching the given parameters.
@@ -27,7 +28,7 @@ public interface HorseService {
    * @param searchParameters the parameters of the horses to be listed
    * @return list of all stored horses with the given parameters
    */
-  Stream<HorseListDto> allHorses(HorseSearchDto searchParameters);
+  Stream<HorseListDto> allHorses(HorseSearchDto searchParameters) throws ServiceException;
 
 
   /**
@@ -41,7 +42,7 @@ public interface HorseService {
    * @throws ValidationException if the update data given for the horse is in itself incorrect (description too long, no name, …)
    * @throws ConflictException   if the update data given for the horse is in conflict the data currently in the system (owner does not exist, …)
    */
-  HorseDetailDto update(HorseDetailDto horse) throws NotFoundException, ValidationException, ConflictException;
+  HorseDetailDto update(HorseDetailDto horse) throws NotFoundException, ServiceException, ValidationException, ConflictException;
 
 
   /**
@@ -53,21 +54,21 @@ public interface HorseService {
    * @return the horse with ID {@code id}
    * @throws NotFoundException if the horse with the given ID does not exist in the persistent data store
    */
-  HorseDetailDto getById(long id) throws NotFoundException;
+  HorseDetailDto getById(long id) throws ServiceException, NotFoundException;
 
 
   /**
    * @param newHorse the horse to add
    * @return the newly added horse
    */
-  HorseDetailDto create(HorseDetailDto newHorse) throws NotFoundException;
+  HorseDetailDto create(HorseDetailDto newHorse) throws NotFoundException, ServiceException, ValidationException, ConflictException;
 
   /**
    * Deletes the Horse specified by an id.
    *
    * @param id the id from the specified horse
    */
-  void delete(long id);
+  void delete(long id) throws NotFoundException, ServiceException, ValidationException, ConflictException;
 
   Stream<HorseFamilyTreeDto> getFamilyTree(HorseFamilyTreeDto parameters);
 }

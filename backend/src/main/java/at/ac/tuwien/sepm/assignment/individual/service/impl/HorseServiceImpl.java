@@ -9,6 +9,8 @@ import at.ac.tuwien.sepm.assignment.individual.entity.Horse;
 import at.ac.tuwien.sepm.assignment.individual.exception.ConflictException;
 import at.ac.tuwien.sepm.assignment.individual.exception.FatalException;
 import at.ac.tuwien.sepm.assignment.individual.exception.NotFoundException;
+import at.ac.tuwien.sepm.assignment.individual.exception.PersistenceException;
+import at.ac.tuwien.sepm.assignment.individual.exception.ServiceException;
 import at.ac.tuwien.sepm.assignment.individual.exception.ValidationException;
 import at.ac.tuwien.sepm.assignment.individual.mapper.HorseMapper;
 import at.ac.tuwien.sepm.assignment.individual.persistence.HorseDao;
@@ -21,6 +23,7 @@ import org.springframework.stereotype.Service;
 import java.lang.invoke.MethodHandles;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.stream.Collectors;
@@ -42,115 +45,146 @@ public class HorseServiceImpl implements HorseService {
   }
 
   @Override
-  public Stream<HorseListDto> allHorses() {
+  public Stream<HorseListDto> allHorses() throws ServiceException {
     LOG.trace("allHorses()");
-    var horses = dao.getAll();
-    var ownerIds = horses.stream()
-        .map(Horse::getOwnerId)
-        .filter(Objects::nonNull)
-        .collect(Collectors.toUnmodifiableSet());
-    Map<Long, OwnerDto> ownerMap;
     try {
-      ownerMap = ownerService.getAllById(ownerIds);
-    } catch (NotFoundException e) {
-      throw new FatalException("Horse, that is already persisted, refers to non-existing owner", e);
+      var horses = dao.getAll();
+      var ownerIds = horses.stream()
+          .map(Horse::getOwnerId)
+          .filter(Objects::nonNull)
+          .collect(Collectors.toUnmodifiableSet());
+      Map<Long, OwnerDto> ownerMap;
+      try {
+        ownerMap = ownerService.getAllById(ownerIds);
+      } catch (NotFoundException e) {
+        throw new FatalException("Horse, that is already persisted, refers to non-existing owner", e);
+      }
+      return horses.stream()
+          .map(horse -> mapper.entityToListDto(horse, ownerMap));
+    } catch (PersistenceException e) {
+      throw new ServiceException(e.getMessage(), e);
     }
-    return horses.stream()
-        .map(horse -> mapper.entityToListDto(horse, ownerMap));
   }
 
-  public Stream<HorseListDto> allHorses(HorseSearchDto requestParameters) {
+  public Stream<HorseListDto> allHorses(HorseSearchDto requestParameters) throws ServiceException {
     LOG.trace("allHorses({}}), service", requestParameters);
-    Collection<Horse> horses;
-    if (requestParameters.ownerName() == null) {
-      horses = dao.search(requestParameters);
-    } else {
-      horses = dao.getAll(requestParameters);
-    }
-    var ownerIds = horses.stream()
-        .map(Horse::getOwnerId)
-        .filter(Objects::nonNull)
-        .collect(Collectors.toUnmodifiableSet());
-    Map<Long, OwnerDto> ownerMap;
     try {
-      ownerMap = ownerService.getAllById(ownerIds);
-    } catch (NotFoundException e) {
-      throw new FatalException("Horse, that is already persisted, refers to non-existing owner", e);
+      Collection<Horse> horses;
+      if (requestParameters.ownerName() == null) {
+        horses = dao.search(requestParameters);
+      } else {
+        horses = dao.getAll(requestParameters);
+      }
+      var ownerIds = horses.stream()
+          .map(Horse::getOwnerId)
+          .filter(Objects::nonNull)
+          .collect(Collectors.toUnmodifiableSet());
+      Map<Long, OwnerDto> ownerMap;
+      try {
+        ownerMap = ownerService.getAllById(ownerIds);
+      } catch (NotFoundException e) {
+        throw new FatalException("Horse, that is already persisted, refers to non-existing owner", e);
+      }
+      return horses.stream()
+          .map(horse -> mapper.entityToListDto(horse, ownerMap));
+    } catch (PersistenceException e) {
+      throw new ServiceException(e.getMessage(), e);
     }
-    return horses.stream()
-        .map(horse -> mapper.entityToListDto(horse, ownerMap));
   }
 
-  public HorseDetailDto[] getParents(Horse child) throws NotFoundException {
-    HorseDetailDto[] parents = new HorseDetailDto[2];
-    Horse mother;
-    Horse father;
-    HorseDetailDto motherDTO;
-    HorseDetailDto fatherDTO;
+  public HorseDetailDto[] getParents(Horse child) throws NotFoundException, ServiceException {
+    try {
+      HorseDetailDto[] parents = new HorseDetailDto[2];
+      Horse mother;
+      Horse father;
+      HorseDetailDto motherDTO;
+      HorseDetailDto fatherDTO;
 
-    if (child.getMotherId() != null) {
-      mother = dao.getById(child.getMotherId());
-      motherDTO = mapper.entityToDetailDto(mother, ownerMapForSingleId(mother.getOwnerId()), null, null);
-    } else {
-      motherDTO = null;
-    }
-    if (child.getFatherId() != null) {
-      father = dao.getById(child.getFatherId());
-      fatherDTO = mapper.entityToDetailDto(father, ownerMapForSingleId(father.getOwnerId()), null, null);
-    } else {
-      fatherDTO = null;
-    }
+      if (child.getMotherId() != null) {
+        mother = dao.getById(child.getMotherId());
+        motherDTO = mapper.entityToDetailDto(mother, ownerMapForSingleId(mother.getOwnerId()), null, null);
+      } else {
+        motherDTO = null;
+      }
+      if (child.getFatherId() != null) {
+        father = dao.getById(child.getFatherId());
+        fatherDTO = mapper.entityToDetailDto(father, ownerMapForSingleId(father.getOwnerId()), null, null);
+      } else {
+        fatherDTO = null;
+      }
 
-    parents[0] = motherDTO;
-    parents[1] = fatherDTO;
-    return parents;
+      parents[0] = motherDTO;
+      parents[1] = fatherDTO;
+      return parents;
+    } catch (PersistenceException e) {
+      throw new ServiceException(e.getMessage(), e);
+    }
   }
 
 
   @Override
-  public HorseDetailDto update(HorseDetailDto horse) throws NotFoundException, ValidationException, ConflictException {
+  public HorseDetailDto update(HorseDetailDto horse) throws ServiceException, NotFoundException, ValidationException, ConflictException {
     LOG.trace("update({})", horse);
-    validator.validateForUpdate(horse);
-    var updatedHorse = dao.update(horse);
-    var parents = getParents(updatedHorse);
-    return mapper.entityToDetailDto(
-        updatedHorse,
-        ownerMapForSingleId(updatedHorse.getOwnerId()),
-        parents[0],
-        parents[1]);
+    try {
+      validator.validateForUpdate(horse);
+      var updatedHorse = dao.update(horse);
+      var parents = getParents(updatedHorse);
+      return mapper.entityToDetailDto(
+          updatedHorse,
+          ownerMapForSingleId(updatedHorse.getOwnerId()),
+          parents[0],
+          parents[1]);
+    } catch (PersistenceException e) {
+      throw new ServiceException(e.getMessage(), e);
+    }
   }
 
 
   @Override
-  public HorseDetailDto create(HorseDetailDto newHorse) throws NotFoundException {
+  public HorseDetailDto create(HorseDetailDto newHorse) throws ServiceException, NotFoundException, ValidationException, ConflictException {
     LOG.trace("create({}), service", newHorse);
-    validator.validateForCreate(newHorse);
-    var createdHorse = dao.create(newHorse);
-    var parents = getParents(createdHorse);
-    return mapper.entityToDetailDto(
-        createdHorse,
-        ownerMapForSingleId(createdHorse.getOwnerId()),
-        parents[0],
-        parents[1]);
+    try {
+      validator.validateForCreate(newHorse);
+      var createdHorse = dao.create(newHorse);
+      var parents = getParents(createdHorse);
+      return mapper.entityToDetailDto(
+          createdHorse,
+          ownerMapForSingleId(createdHorse.getOwnerId()),
+          parents[0],
+          parents[1]);
+    } catch (PersistenceException e) {
+      throw new ServiceException(e.getMessage(), e);
+    }
   }
 
 
   @Override
-  public HorseDetailDto getById(long id) throws NotFoundException {
+  public HorseDetailDto getById(long id) throws NotFoundException, ServiceException {
     LOG.trace("details({})", id);
-    Horse horse = dao.getById(id);
-    var parents = getParents(horse);
-    return mapper.entityToDetailDto(
-        horse,
-        ownerMapForSingleId(horse.getOwnerId()),
-        parents[0],
-        parents[1]);
+    try {
+      Horse horse = dao.getById(id);
+      var parents = getParents(horse);
+      return mapper.entityToDetailDto(
+          horse,
+          ownerMapForSingleId(horse.getOwnerId()),
+          parents[0],
+          parents[1]);
+    } catch (PersistenceException e) {
+      throw new ServiceException(e.getMessage(), e);
+    }
   }
 
   @Override
-  public void delete(long id) {
+  public void delete(long id) throws NotFoundException, ServiceException, ValidationException, ConflictException {
     LOG.trace("delete({}), service", id);
-    dao.delete(id);
+    try {
+      if (dao.getById(id) == null) {
+        throw new NotFoundException("Horse with id " + id + " was not found");
+      }
+      dao.delete(id);
+    } catch (PersistenceException e) {
+      throw new ServiceException(e.getMessage(), e);
+    }
   }
 
   @Override
@@ -160,7 +194,7 @@ public class HorseServiceImpl implements HorseService {
         .map(horse -> mapper.entityToFamilyTreeDto(horse, parameters.generations()));
   }
 
-  private Map<Long, OwnerDto> ownerMapForSingleId(Long ownerId) {
+  private Map<Long, OwnerDto> ownerMapForSingleId(Long ownerId) throws ServiceException {
     try {
       return ownerId == null
           ? null

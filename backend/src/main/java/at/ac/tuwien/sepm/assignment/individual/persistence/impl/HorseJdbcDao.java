@@ -6,10 +6,12 @@ import at.ac.tuwien.sepm.assignment.individual.dto.HorseSearchDto;
 import at.ac.tuwien.sepm.assignment.individual.entity.Horse;
 import at.ac.tuwien.sepm.assignment.individual.exception.FatalException;
 import at.ac.tuwien.sepm.assignment.individual.exception.NotFoundException;
+import at.ac.tuwien.sepm.assignment.individual.exception.PersistenceException;
 import at.ac.tuwien.sepm.assignment.individual.persistence.HorseDao;
 import at.ac.tuwien.sepm.assignment.individual.type.Sex;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.dao.DataAccessException;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.support.GeneratedKeyHolder;
 import org.springframework.jdbc.support.KeyHolder;
@@ -69,156 +71,184 @@ public class HorseJdbcDao implements HorseDao {
   }
 
   @Override
-  public List<Horse> getAll() {
+  public List<Horse> getAll() throws PersistenceException {
     LOG.trace("getAll()");
-    return jdbcTemplate.query(SQL_SELECT_ALL, this::mapRow);
+    try {
+      return jdbcTemplate.query(SQL_SELECT_ALL, this::mapRow);
+    } catch (DataAccessException e) {
+      throw new PersistenceException("Internal error occurred while fetching all horses", e);
+    }
   }
 
   @Override
-  public List<Horse> search(HorseSearchDto requestParameters) {
+  public List<Horse> search(HorseSearchDto requestParameters) throws PersistenceException {
     LOG.trace("search({})", requestParameters);
-    var params = new ArrayList<>();
-    params.add(requestParameters.name());
-    params.add(requestParameters.sex().toString());
-    params.add(requestParameters.limit());
-    var query = SQL_SELECT_SEARCH_PARENTS;
-    return jdbcTemplate.query(query, this::mapRow, params.toArray());
+    try {
+      var params = new ArrayList<>();
+      params.add(requestParameters.name());
+      params.add(requestParameters.sex().toString());
+      params.add(requestParameters.limit());
+      var query = SQL_SELECT_SEARCH_PARENTS;
+      return jdbcTemplate.query(query, this::mapRow, params.toArray());
+    } catch (DataAccessException e) {
+      throw new PersistenceException("Internal error occurred while fetching horses suggestions", e);
+    }
   }
 
   @Override
-  public List<Horse> getAll(HorseSearchDto parameters) {
+  public List<Horse> getAll(HorseSearchDto parameters) throws PersistenceException {
     LOG.trace("getAll({}), persistence", parameters);
-    var query = SQL_SELECT_SEARCH;
-    var params = new ArrayList<>();
-    params.add(parameters.name());
-    var sexParameter = parameters.sex() == null ? null : parameters.sex().toString();
-    params.add(sexParameter);
-    params.add(sexParameter);
-    LocalDate bornBeforeParameter = parameters.bornBefore() == null ? LocalDate.now() : parameters.bornBefore();
-    params.add(bornBeforeParameter);
+    try {
+      var query = SQL_SELECT_SEARCH;
+      var params = new ArrayList<>();
+      params.add(parameters.name());
+      var sexParameter = parameters.sex() == null ? null : parameters.sex().toString();
+      params.add(sexParameter);
+      params.add(sexParameter);
+      LocalDate bornBeforeParameter = parameters.bornBefore() == null ? LocalDate.now() : parameters.bornBefore();
+      params.add(bornBeforeParameter);
 
-    if (parameters.description() != "") {
-      query += " AND UPPER(description) like UPPER('%'||COALESCE(?, '')||'%')";
-      params.add(parameters.description());
+      if (parameters.description() != "") {
+        query += " AND UPPER(description) like UPPER('%'||COALESCE(?, '')||'%')";
+        params.add(parameters.description());
+      }
+      if (parameters.ownerName() != "") {
+        query += " AND CONCAT(CONCAT(UPPER(owner.first_name), ' '), UPPER(owner.last_name)) like UPPER('%'||COALESCE(?, '')||'%');";
+        params.add(parameters.ownerName());
+      }
+      return jdbcTemplate.query(query, this::mapRow, params.toArray());
+    } catch (DataAccessException e) {
+      throw new PersistenceException("Internal error occurred while fetching horses with given parameters", e);
     }
-    if (parameters.ownerName() != "") {
-      query += " AND CONCAT(CONCAT(UPPER(owner.first_name), ' '), UPPER(owner.last_name)) like UPPER('%'||COALESCE(?, '')||'%');";
-      params.add(parameters.ownerName());
-    }
-    return jdbcTemplate.query(query, this::mapRow, params.toArray());
   }
 
   @Override
-  public Horse getById(long id) throws NotFoundException {
+  public Horse getById(long id) throws NotFoundException, PersistenceException {
     LOG.trace("getById({})", id);
-    List<Horse> horses;
-    horses = jdbcTemplate.query(SQL_SELECT_BY_ID, this::mapRow, id);
+    try {
+      List<Horse> horses;
+      horses = jdbcTemplate.query(SQL_SELECT_BY_ID, this::mapRow, id);
 
-    if (horses.isEmpty()) {
-      throw new NotFoundException("No horse with ID %d found".formatted(id));
-    }
-    if (horses.size() > 1) {
-      // This should never happen!!
-      throw new FatalException("Too many horses with ID %d found".formatted(id));
-    }
+      if (horses.isEmpty()) {
+        throw new NotFoundException("No horse with ID %d found".formatted(id));
+      }
+      if (horses.size() > 1) {
+        // This should never happen!!
+        throw new FatalException("Too many horses with ID %d found".formatted(id));
+      }
 
-    return horses.get(0);
+      return horses.get(0);
+    } catch (DataAccessException e) {
+      throw new PersistenceException("Internal error occurred while fetching horse with the given id", e);
+    }
   }
 
 
   @Override
-  public Horse update(HorseDetailDto horse) throws NotFoundException {
+  public Horse update(HorseDetailDto horse) throws NotFoundException, PersistenceException {
     LOG.trace("update({})", horse);
-    KeyHolder keyHolder = new GeneratedKeyHolder();
-    int updated = jdbcTemplate.update(connection -> {
-      PreparedStatement stmt = connection.prepareStatement(SQL_UPDATE,
-          Statement.RETURN_GENERATED_KEYS);
-      stmt.setString(1, horse.name());
-      stmt.setString(2, horse.description());
-      stmt.setDate(3, Date.valueOf(horse.dateOfBirth()));
-      stmt.setString(4, horse.sex().toString());
-      if (horse.ownerId() != null) {
-        stmt.setLong(5, horse.ownerId());
-      } else {
-        stmt.setNull(5, java.sql.Types.NULL);
-      }
-      if (horse.mother() != null) {
-        stmt.setLong(6, horse.motherId());
-      } else {
-        stmt.setNull(6, java.sql.Types.NULL);
-      }
-      if (horse.father() != null) {
-        stmt.setLong(7, horse.fatherId());
-      } else {
-        stmt.setNull(7, java.sql.Types.NULL);
-      }
-      stmt.setLong(8, horse.id());
-      return stmt;
-    }, keyHolder);
+    try {
+      KeyHolder keyHolder = new GeneratedKeyHolder();
+      int updated = jdbcTemplate.update(connection -> {
+        PreparedStatement stmt = connection.prepareStatement(SQL_UPDATE,
+            Statement.RETURN_GENERATED_KEYS);
+        stmt.setString(1, horse.name());
+        stmt.setString(2, horse.description());
+        stmt.setDate(3, Date.valueOf(horse.dateOfBirth()));
+        stmt.setString(4, horse.sex().toString());
+        if (horse.ownerId() != null) {
+          stmt.setLong(5, horse.ownerId());
+        } else {
+          stmt.setNull(5, java.sql.Types.NULL);
+        }
+        if (horse.mother() != null) {
+          stmt.setLong(6, horse.motherId());
+        } else {
+          stmt.setNull(6, java.sql.Types.NULL);
+        }
+        if (horse.father() != null) {
+          stmt.setLong(7, horse.fatherId());
+        } else {
+          stmt.setNull(7, java.sql.Types.NULL);
+        }
+        stmt.setLong(8, horse.id());
+        return stmt;
+      }, keyHolder);
 
-    if (updated == 0) {
-      throw new NotFoundException("Could not update horse with ID " + horse.id() + ", because it does not exist");
+      if (updated == 0) {
+        throw new NotFoundException("Could not update horse with ID " + horse.id() + ", because it does not exist");
+      }
+      return new Horse()
+          .setId(horse.id())
+          .setName(horse.name())
+          .setDescription(horse.description())
+          .setDateOfBirth(horse.dateOfBirth())
+          .setSex(horse.sex())
+          .setOwnerId(horse.ownerId())
+          .setMotherId(horse.motherId())
+          .setFatherId(horse.fatherId());
+    } catch (DataAccessException e) {
+      throw new PersistenceException("Internal error occurred while editing horse", e);
     }
-    return new Horse()
-        .setId(horse.id())
-        .setName(horse.name())
-        .setDescription(horse.description())
-        .setDateOfBirth(horse.dateOfBirth())
-        .setSex(horse.sex())
-        .setOwnerId(horse.ownerId())
-        .setMotherId(horse.motherId())
-        .setFatherId(horse.fatherId());
   }
 
 
   @Override
-  public Horse create(HorseDetailDto newHorse) {
+  public Horse create(HorseDetailDto newHorse) throws PersistenceException {
     LOG.trace("create({}), persistence", newHorse);
-    KeyHolder keyHolder = new GeneratedKeyHolder();
-    jdbcTemplate.update(connection -> {
-      PreparedStatement stmt = connection.prepareStatement(SQL_INSERT, Statement.RETURN_GENERATED_KEYS);
-      stmt.setString(1, newHorse.name());
-      stmt.setString(2, newHorse.description());
-      stmt.setDate(3, Date.valueOf(newHorse.dateOfBirth()));
-      stmt.setString(4, newHorse.sex().toString());
-      if (newHorse.ownerId() != null) {
-        stmt.setLong(5, newHorse.ownerId());
-      } else {
-        stmt.setNull(5, java.sql.Types.NULL);
-      }
-      if (newHorse.motherId() != null) {
-        stmt.setLong(6, newHorse.motherId());
-      } else {
-        stmt.setNull(6, java.sql.Types.NULL);
-      }
-      if (newHorse.fatherId() != null) {
-        stmt.setLong(7, newHorse.fatherId());
-      } else {
-        stmt.setNull(7, java.sql.Types.NULL);
-      }
-      return stmt;
-    }, keyHolder);
+    try {
+      KeyHolder keyHolder = new GeneratedKeyHolder();
+      jdbcTemplate.update(connection -> {
+        PreparedStatement stmt = connection.prepareStatement(SQL_INSERT, Statement.RETURN_GENERATED_KEYS);
+        stmt.setString(1, newHorse.name());
+        stmt.setString(2, newHorse.description());
+        stmt.setDate(3, Date.valueOf(newHorse.dateOfBirth()));
+        stmt.setString(4, newHorse.sex().toString());
+        if (newHorse.ownerId() != null) {
+          stmt.setLong(5, newHorse.ownerId());
+        } else {
+          stmt.setNull(5, java.sql.Types.NULL);
+        }
+        if (newHorse.motherId() != null) {
+          stmt.setLong(6, newHorse.motherId());
+        } else {
+          stmt.setNull(6, java.sql.Types.NULL);
+        }
+        if (newHorse.fatherId() != null) {
+          stmt.setLong(7, newHorse.fatherId());
+        } else {
+          stmt.setNull(7, java.sql.Types.NULL);
+        }
+        return stmt;
+      }, keyHolder);
 
-    return new Horse()
-        .setName(newHorse.name())
-        .setDescription(newHorse.description())
-        .setDateOfBirth(newHorse.dateOfBirth())
-        .setSex(newHorse.sex())
-        .setOwnerId(newHorse.ownerId())
-        .setMotherId(newHorse.motherId())
-        .setFatherId(newHorse.fatherId())
-        ;
+      return new Horse()
+          .setName(newHorse.name())
+          .setDescription(newHorse.description())
+          .setDateOfBirth(newHorse.dateOfBirth())
+          .setSex(newHorse.sex())
+          .setOwnerId(newHorse.ownerId())
+          .setMotherId(newHorse.motherId())
+          .setFatherId(newHorse.fatherId())
+          ;
+    } catch (DataAccessException e) {
+      throw new PersistenceException("Internal error occurred while creating horse", e);
+    }
   }
 
   @Override
-  public void delete(long id) {
+  public void delete(long id) throws PersistenceException {
     LOG.trace("delete({}), persistence", id);
-    KeyHolder keyHolder = new GeneratedKeyHolder();
-    jdbcTemplate.update(connection -> {
-      PreparedStatement stmt = connection.prepareStatement(SQL_DELETE, Statement.RETURN_GENERATED_KEYS);
-      stmt.setLong(1, id);
-      return stmt;
-    }, keyHolder);
+    try {
+      KeyHolder keyHolder = new GeneratedKeyHolder();
+      jdbcTemplate.update(connection -> {
+        PreparedStatement stmt = connection.prepareStatement(SQL_DELETE, Statement.RETURN_GENERATED_KEYS);
+        stmt.setLong(1, id);
+        return stmt;
+      }, keyHolder);
+    } catch (DataAccessException e) {
+      throw new PersistenceException("Internal error occurred while deleting horses", e);
+    }
   }
 
   @Override

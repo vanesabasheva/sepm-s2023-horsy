@@ -6,6 +6,7 @@ import at.ac.tuwien.sepm.assignment.individual.dto.HorseListDto;
 import at.ac.tuwien.sepm.assignment.individual.dto.HorseSearchDto;
 import at.ac.tuwien.sepm.assignment.individual.exception.ConflictException;
 import at.ac.tuwien.sepm.assignment.individual.exception.NotFoundException;
+import at.ac.tuwien.sepm.assignment.individual.exception.ServiceException;
 import at.ac.tuwien.sepm.assignment.individual.exception.ValidationException;
 import at.ac.tuwien.sepm.assignment.individual.service.HorseService;
 import org.slf4j.Logger;
@@ -40,10 +41,16 @@ public class HorseEndpoint {
   public Stream<HorseListDto> searchHorses(HorseSearchDto searchParameters) {
     LOG.info("GET " + BASE_PATH);
     LOG.debug("request parameters: {}", searchParameters);
-    if (searchParameters.name() == null) {
-      return service.allHorses();
-    } else {
-      return service.allHorses(searchParameters);
+    try {
+      if (searchParameters.name() == null) {
+        return service.allHorses();
+      } else {
+        return service.allHorses(searchParameters);
+      }
+    } catch (ServiceException e) {
+      HttpStatus status = HttpStatus.INTERNAL_SERVER_ERROR;
+      logClientError(status, e.getMessage(), e);
+      throw new ResponseStatusException(status, e.getMessage());
     }
   }
 
@@ -56,12 +63,16 @@ public class HorseEndpoint {
       HttpStatus status = HttpStatus.NOT_FOUND;
       logClientError(status, "Horse to get details of not found", e);
       throw new ResponseStatusException(status, e.getMessage(), e);
+    } catch (ServiceException e) {
+      HttpStatus status = HttpStatus.INTERNAL_SERVER_ERROR;
+      logClientError(status, e.getMessage(), e);
+      throw new ResponseStatusException(status, e.getMessage());
     }
   }
 
 
   @PutMapping("{id}")
-  public HorseDetailDto update(@PathVariable long id, @RequestBody HorseDetailDto toUpdate) throws ValidationException, ConflictException {
+  public HorseDetailDto update(@PathVariable long id, @RequestBody HorseDetailDto toUpdate) {
     LOG.info("PUT " + BASE_PATH + "/{}", toUpdate);
     LOG.debug("Body of request:\n{}", toUpdate);
     try {
@@ -70,20 +81,68 @@ public class HorseEndpoint {
       HttpStatus status = HttpStatus.NOT_FOUND;
       logClientError(status, "Horse to update not found", e);
       throw new ResponseStatusException(status, e.getMessage(), e);
+    } catch (ServiceException e) {
+      HttpStatus status = HttpStatus.INTERNAL_SERVER_ERROR;
+      logClientError(status, e.getMessage(), e);
+      throw new ResponseStatusException(status, e.getMessage());
+    } catch (ValidationException e) {
+      HttpStatus status = HttpStatus.UNPROCESSABLE_ENTITY;
+      logClientError(status, e.getMessage(), e);
+      throw new ResponseStatusException(status, e.getMessage());
+    } catch (ConflictException e) {
+      HttpStatus status = HttpStatus.CONFLICT;
+      logClientError(status, e.getMessage(), e);
+      throw new ResponseStatusException(status, e.getMessage());
     }
   }
 
 
   @PostMapping
-  public HorseDetailDto create(@RequestBody HorseDetailDto toAdd) throws NotFoundException {
+  public HorseDetailDto create(@RequestBody HorseDetailDto toAdd) {
     LOG.info("PUT " + BASE_PATH + "/{}", toAdd);
-    return service.create(toAdd);
+    try {
+      return service.create(toAdd);
+    } catch (NotFoundException e) {
+      HttpStatus status = HttpStatus.NOT_FOUND;
+      logClientError(status, e.getMessage(), e);
+      throw new ResponseStatusException(status, e.getMessage(), e);
+    } catch (ServiceException e) {
+      HttpStatus status = HttpStatus.INTERNAL_SERVER_ERROR;
+      logClientError(status, e.getMessage(), e);
+      throw new ResponseStatusException(status, e.getMessage());
+    } catch (ValidationException e) {
+      HttpStatus status = HttpStatus.UNPROCESSABLE_ENTITY;
+      logClientError(status, e.getMessage(), e);
+      throw new ResponseStatusException(status, e.getMessage());
+    } catch (ConflictException e) {
+      HttpStatus status = HttpStatus.CONFLICT;
+      logClientError(status, e.getMessage(), e);
+      throw new ResponseStatusException(status, e.getMessage());
+    }
   }
 
   @DeleteMapping("{id}")
   public void delete(@PathVariable long id) {
     LOG.info("DELETE " + BASE_PATH + "/{}", id);
-    service.delete(id);
+    try {
+      service.delete(id);
+    } catch (NotFoundException e) {
+      HttpStatus status = HttpStatus.NOT_FOUND;
+      logClientError(status, e.getMessage(), e);
+      throw new ResponseStatusException(status, e.getMessage(), e);
+    } catch (ServiceException e) {
+      HttpStatus status = HttpStatus.INTERNAL_SERVER_ERROR;
+      logClientError(status, e.getMessage(), e);
+      throw new ResponseStatusException(status, e.getMessage());
+    } catch (ValidationException e) {
+      HttpStatus status = HttpStatus.UNPROCESSABLE_ENTITY;
+      logClientError(status, e.getMessage(), e);
+      throw new ResponseStatusException(status, e.getMessage());
+    } catch (ConflictException e) {
+      HttpStatus status = HttpStatus.CONFLICT;
+      logClientError(status, e.getMessage(), e);
+      throw new ResponseStatusException(status, e.getMessage());
+    }
   }
 
   @GetMapping("{id}/familytree")
