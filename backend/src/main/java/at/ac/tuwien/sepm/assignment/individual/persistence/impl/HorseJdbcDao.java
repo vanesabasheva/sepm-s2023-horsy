@@ -1,6 +1,7 @@
 package at.ac.tuwien.sepm.assignment.individual.persistence.impl;
 
 import at.ac.tuwien.sepm.assignment.individual.dto.HorseDetailDto;
+import at.ac.tuwien.sepm.assignment.individual.dto.HorseFamilyTreeDto;
 import at.ac.tuwien.sepm.assignment.individual.dto.HorseSearchDto;
 import at.ac.tuwien.sepm.assignment.individual.entity.Horse;
 import at.ac.tuwien.sepm.assignment.individual.exception.FatalException;
@@ -50,6 +51,15 @@ public class HorseJdbcDao implements HorseDao {
       + " WHERE UPPER(name) like UPPER('%'||COALESCE(?, '')||'%')"
       + " AND sex IN( COALESCE(?,'MALE'), COALESCE(?, 'FEMALE') )"
       + " AND date_of_birth <= ?";
+  private static final String SQL_GET_FAMILY_TREE =
+      "WITH RECURSIVE tmp(id, name, description, sex, date_of_birth, owner_id, mother_id, father_id, depth, depth_first) AS"
+          + " (select id, name, description, sex, date_of_birth, owner_id, mother_id, father_id, 0, id::text as depth_first"
+          + " FROM " + TABLE_NAME + " WHERE horse.id = ?"
+          + " UNION ALL SELECT h.id, h.name, h.description, h.sex, h.date_of_birth, "
+          + " h.owner_id, h.mother_id, h.father_id, t.depth + 1, t.depth_first || '-' || h.id::text as depth_first "
+          + " FROM  horse h, tmp t"
+          + " WHERE (h.id = t.mother_id or h.id = t.father_id) and t.depth_first not like '%' || h.id::text || '%') "
+          + " SELECT * FROM tmp WHERE depth < ? ORDER BY depth_first;";
 
   private final JdbcTemplate jdbcTemplate;
 
@@ -209,6 +219,15 @@ public class HorseJdbcDao implements HorseDao {
       stmt.setLong(1, id);
       return stmt;
     }, keyHolder);
+  }
+
+  @Override
+  public List<Horse> getFamilyTree(HorseFamilyTreeDto parameters) {
+    var params = new ArrayList<>();
+    var query = SQL_GET_FAMILY_TREE;
+    params.add(parameters.id());
+    params.add(parameters.generations());
+    return jdbcTemplate.query(query, this::mapRow, params.toArray());
   }
 
 

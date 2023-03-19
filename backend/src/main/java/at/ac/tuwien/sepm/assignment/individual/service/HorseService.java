@@ -1,6 +1,7 @@
 package at.ac.tuwien.sepm.assignment.individual.service;
 
 import at.ac.tuwien.sepm.assignment.individual.dto.HorseDetailDto;
+import at.ac.tuwien.sepm.assignment.individual.dto.HorseFamilyTreeDto;
 import at.ac.tuwien.sepm.assignment.individual.dto.HorseListDto;
 import at.ac.tuwien.sepm.assignment.individual.dto.HorseSearchDto;
 import at.ac.tuwien.sepm.assignment.individual.exception.ConflictException;
@@ -67,4 +68,6 @@ public interface HorseService {
    * @param id the id from the specified horse
    */
   void delete(long id);
+
+  Stream<HorseFamilyTreeDto> getFamilyTree(HorseFamilyTreeDto parameters);
 }

@@ -1,6 +1,7 @@
 package at.ac.tuwien.sepm.assignment.individual.mapper;
 
 import at.ac.tuwien.sepm.assignment.individual.dto.HorseDetailDto;
+import at.ac.tuwien.sepm.assignment.individual.dto.HorseFamilyTreeDto;
 import at.ac.tuwien.sepm.assignment.individual.dto.HorseListDto;
 import at.ac.tuwien.sepm.assignment.individual.dto.OwnerDto;
 import at.ac.tuwien.sepm.assignment.individual.entity.Horse;
@@ -71,6 +72,23 @@ public class HorseMapper {
         getOwner(horse, owners),
         mother,
         father
+    );
+  }
+
+  public HorseFamilyTreeDto entityToFamilyTreeDto(Horse horse, Long generations) {
+    LOG.trace("entityToDto({})", horse);
+    if (horse == null) {
+      return null;
+    }
+
+    return new HorseFamilyTreeDto(
+        horse.getId(),
+        horse.getName(),
+        horse.getDateOfBirth(),
+        horse.getSex(),
+        horse.getMotherId(),
+        horse.getFatherId(),
+        generations
     );
   }
 

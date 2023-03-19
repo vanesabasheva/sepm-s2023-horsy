@@ -1,6 +1,7 @@
 package at.ac.tuwien.sepm.assignment.individual.rest;
 
 import at.ac.tuwien.sepm.assignment.individual.dto.HorseDetailDto;
+import at.ac.tuwien.sepm.assignment.individual.dto.HorseFamilyTreeDto;
 import at.ac.tuwien.sepm.assignment.individual.dto.HorseListDto;
 import at.ac.tuwien.sepm.assignment.individual.dto.HorseSearchDto;
 import at.ac.tuwien.sepm.assignment.individual.exception.ConflictException;
@@ -85,6 +86,10 @@ public class HorseEndpoint {
     service.delete(id);
   }
 
+  @GetMapping("{id}/familytree")
+  public Stream<HorseFamilyTreeDto> getFamilyTree(HorseFamilyTreeDto fromHorse) {
+    return service.getFamilyTree(fromHorse);
+  }
 
   private void logClientError(HttpStatus status, String message, Exception e) {
     LOG.warn("{} {}: {}: {}", status.value(), message, e.getClass().getSimpleName(), e.getMessage());

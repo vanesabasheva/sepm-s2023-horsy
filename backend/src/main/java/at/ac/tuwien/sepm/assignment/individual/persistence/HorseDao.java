@@ -1,6 +1,7 @@
 package at.ac.tuwien.sepm.assignment.individual.persistence;
 
 import at.ac.tuwien.sepm.assignment.individual.dto.HorseDetailDto;
+import at.ac.tuwien.sepm.assignment.individual.dto.HorseFamilyTreeDto;
 import at.ac.tuwien.sepm.assignment.individual.dto.HorseSearchDto;
 import at.ac.tuwien.sepm.assignment.individual.entity.Horse;
 import at.ac.tuwien.sepm.assignment.individual.exception.NotFoundException;
@@ -68,4 +69,6 @@ public interface HorseDao {
    * @return a list of all stored horses matching the parameters
    */
   List<Horse> getAll(HorseSearchDto parameters);
+
+  List<Horse> getFamilyTree(HorseFamilyTreeDto parameters);
 }

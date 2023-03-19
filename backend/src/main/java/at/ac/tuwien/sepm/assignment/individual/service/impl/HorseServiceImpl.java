@@ -1,6 +1,7 @@
 package at.ac.tuwien.sepm.assignment.individual.service.impl;
 
 import at.ac.tuwien.sepm.assignment.individual.dto.HorseDetailDto;
+import at.ac.tuwien.sepm.assignment.individual.dto.HorseFamilyTreeDto;
 import at.ac.tuwien.sepm.assignment.individual.dto.HorseListDto;
 import at.ac.tuwien.sepm.assignment.individual.dto.HorseSearchDto;
 import at.ac.tuwien.sepm.assignment.individual.dto.OwnerDto;
@@ -152,6 +153,12 @@ public class HorseServiceImpl implements HorseService {
     dao.delete(id);
   }
 
+  @Override
+  public Stream<HorseFamilyTreeDto> getFamilyTree(HorseFamilyTreeDto parameters) {
+    List<Horse> familyTree = dao.getFamilyTree(parameters);
+    return familyTree.stream()
+        .map(horse -> mapper.entityToFamilyTreeDto(horse, parameters.generations()));
+  }
 
   private Map<Long, OwnerDto> ownerMapForSingleId(Long ownerId) {
     try {
