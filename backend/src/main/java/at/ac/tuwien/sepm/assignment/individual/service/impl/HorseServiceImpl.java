@@ -189,10 +189,14 @@ public class HorseServiceImpl implements HorseService {
   }
 
   @Override
-  public Stream<HorseFamilyTreeDto> getFamilyTree(HorseFamilyTreeDto parameters) {
-    List<Horse> familyTree = dao.getFamilyTree(parameters);
-    return familyTree.stream()
-        .map(horse -> mapper.entityToFamilyTreeDto(horse, parameters.generations()));
+  public Stream<HorseFamilyTreeDto> getFamilyTree(HorseFamilyTreeDto parameters) throws ServiceException {
+    try {
+      List<Horse> familyTree = dao.getFamilyTree(parameters);
+      return familyTree.stream()
+          .map(horse -> mapper.entityToFamilyTreeDto(horse, parameters.generations()));
+    } catch (PersistenceException e) {
+      throw new ServiceException(e.getMessage(), e);
+    }
   }
 
   private Map<Long, OwnerDto> ownerMapForSingleId(Long ownerId) throws ServiceException {

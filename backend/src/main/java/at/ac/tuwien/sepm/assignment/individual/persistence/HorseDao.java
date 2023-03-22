@@ -71,5 +71,5 @@ public interface HorseDao {
    */
   List<Horse> getAll(HorseSearchDto parameters) throws PersistenceException;
 
-  List<Horse> getFamilyTree(HorseFamilyTreeDto parameters);
+  List<Horse> getFamilyTree(HorseFamilyTreeDto parameters) throws PersistenceException;
 }

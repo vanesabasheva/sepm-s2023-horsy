@@ -252,12 +252,16 @@ public class HorseJdbcDao implements HorseDao {
   }
 
   @Override
-  public List<Horse> getFamilyTree(HorseFamilyTreeDto parameters) {
-    var params = new ArrayList<>();
-    var query = SQL_GET_FAMILY_TREE;
-    params.add(parameters.id());
-    params.add(parameters.generations());
-    return jdbcTemplate.query(query, this::mapRow, params.toArray());
+  public List<Horse> getFamilyTree(HorseFamilyTreeDto parameters) throws PersistenceException {
+    try {
+      var params = new ArrayList<>();
+      var query = SQL_GET_FAMILY_TREE;
+      params.add(parameters.id());
+      params.add(parameters.generations());
+      return jdbcTemplate.query(query, this::mapRow, params.toArray());
+    } catch (DataAccessException e) {
+      throw new PersistenceException("Internal error occurred while getting family tree of horse", e);
+    }
   }
 
 

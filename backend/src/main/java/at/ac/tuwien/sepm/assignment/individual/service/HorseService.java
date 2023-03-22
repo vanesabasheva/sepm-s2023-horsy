@@ -70,5 +70,5 @@ public interface HorseService {
    */
   void delete(long id) throws NotFoundException, ServiceException, ValidationException, ConflictException;
 
-  Stream<HorseFamilyTreeDto> getFamilyTree(HorseFamilyTreeDto parameters);
+  Stream<HorseFamilyTreeDto> getFamilyTree(HorseFamilyTreeDto parameters) throws NotFoundException, ServiceException, ValidationException, ConflictException;
 }

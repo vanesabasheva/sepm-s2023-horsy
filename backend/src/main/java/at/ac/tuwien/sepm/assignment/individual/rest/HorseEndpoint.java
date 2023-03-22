@@ -147,7 +147,25 @@ public class HorseEndpoint {
 
   @GetMapping("{id}/familytree")
   public Stream<HorseFamilyTreeDto> getFamilyTree(HorseFamilyTreeDto fromHorse) {
-    return service.getFamilyTree(fromHorse);
+    try {
+      return service.getFamilyTree(fromHorse);
+    } catch (NotFoundException e) {
+      HttpStatus status = HttpStatus.NOT_FOUND;
+      logClientError(status, e.getMessage(), e);
+      throw new ResponseStatusException(status, e.getMessage(), e);
+    } catch (ServiceException e) {
+      HttpStatus status = HttpStatus.INTERNAL_SERVER_ERROR;
+      logClientError(status, e.getMessage(), e);
+      throw new ResponseStatusException(status, e.getMessage());
+    } catch (ValidationException e) {
+      HttpStatus status = HttpStatus.UNPROCESSABLE_ENTITY;
+      logClientError(status, e.getMessage(), e);
+      throw new ResponseStatusException(status, e.getMessage());
+    } catch (ConflictException e) {
+      HttpStatus status = HttpStatus.CONFLICT;
+      logClientError(status, e.getMessage(), e);
+      throw new ResponseStatusException(status, e.getMessage());
+    }
   }
 
   private void logClientError(HttpStatus status, String message, Exception e) {
