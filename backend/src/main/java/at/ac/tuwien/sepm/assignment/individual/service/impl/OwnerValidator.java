@@ -20,6 +20,7 @@ public class OwnerValidator {
   );
 
   public void validateForCreate(OwnerCreateDto newOwner) throws ValidationException {
+    LOG.trace("validateForCreate({}), OwnerValidator", newOwner);
     List<String> validationErrors = new ArrayList<>();
     if (newOwner.firstName() == null) {
       validationErrors.add("Owner first name cannot be empty");

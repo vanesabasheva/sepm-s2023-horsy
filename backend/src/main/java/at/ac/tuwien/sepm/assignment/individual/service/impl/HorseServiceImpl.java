@@ -46,7 +46,7 @@ public class HorseServiceImpl implements HorseService {
 
   @Override
   public Stream<HorseListDto> allHorses() throws ServiceException {
-    LOG.trace("allHorses()");
+    LOG.trace("allHorses(), service");
     try {
       var horses = dao.getAll();
       var ownerIds = horses.stream()
@@ -93,6 +93,7 @@ public class HorseServiceImpl implements HorseService {
   }
 
   public HorseDetailDto[] getParents(Horse child) throws NotFoundException, ServiceException {
+    LOG.trace("getParents({}), service", child);
     try {
       HorseDetailDto[] parents = new HorseDetailDto[2];
       Horse mother;
@@ -124,7 +125,7 @@ public class HorseServiceImpl implements HorseService {
 
   @Override
   public HorseDetailDto update(HorseDetailDto horse) throws ServiceException, NotFoundException, ValidationException, ConflictException {
-    LOG.trace("update({})", horse);
+    LOG.trace("update({}), service", horse);
     try {
       List<Horse> allHorses = dao.getAll();
       validator.validateForUpdate(horse, allHorses);
@@ -161,7 +162,7 @@ public class HorseServiceImpl implements HorseService {
 
   @Override
   public HorseDetailDto getById(long id) throws NotFoundException, ServiceException {
-    LOG.trace("details({})", id);
+    LOG.trace("getById({}), service", id);
     try {
       Horse horse = dao.getById(id);
       var parents = getParents(horse);
@@ -190,6 +191,7 @@ public class HorseServiceImpl implements HorseService {
 
   @Override
   public Stream<HorseFamilyTreeDto> getFamilyTree(HorseFamilyTreeDto parameters) throws ServiceException {
+    LOG.trace("getFamilyTree({}), service", parameters);
     try {
       List<Horse> familyTree = dao.getFamilyTree(parameters);
       return familyTree.stream()
@@ -200,6 +202,7 @@ public class HorseServiceImpl implements HorseService {
   }
 
   private Map<Long, OwnerDto> ownerMapForSingleId(Long ownerId) throws ServiceException {
+    LOG.trace("ownerMapForSingleId({}), service", ownerId);
     try {
       return ownerId == null
           ? null

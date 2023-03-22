@@ -72,7 +72,7 @@ public class HorseJdbcDao implements HorseDao {
 
   @Override
   public List<Horse> getAll() throws PersistenceException {
-    LOG.trace("getAll()");
+    LOG.trace("getAll(), persistence");
     try {
       return jdbcTemplate.query(SQL_SELECT_ALL, this::mapRow);
     } catch (DataAccessException e) {
@@ -82,7 +82,7 @@ public class HorseJdbcDao implements HorseDao {
 
   @Override
   public List<Horse> search(HorseSearchDto requestParameters) throws PersistenceException {
-    LOG.trace("search({})", requestParameters);
+    LOG.trace("search({}), persistence", requestParameters);
     try {
       var params = new ArrayList<>();
       params.add(requestParameters.name());
@@ -124,7 +124,7 @@ public class HorseJdbcDao implements HorseDao {
 
   @Override
   public Horse getById(long id) throws NotFoundException, PersistenceException {
-    LOG.trace("getById({})", id);
+    LOG.trace("getById({}), persistence", id);
     try {
       List<Horse> horses;
       horses = jdbcTemplate.query(SQL_SELECT_BY_ID, this::mapRow, id);
@@ -146,7 +146,7 @@ public class HorseJdbcDao implements HorseDao {
 
   @Override
   public Horse update(HorseDetailDto horse) throws NotFoundException, PersistenceException {
-    LOG.trace("update({})", horse);
+    LOG.trace("update({}), persistence", horse);
     try {
       KeyHolder keyHolder = new GeneratedKeyHolder();
       int updated = jdbcTemplate.update(connection -> {
@@ -253,6 +253,7 @@ public class HorseJdbcDao implements HorseDao {
 
   @Override
   public List<Horse> getFamilyTree(HorseFamilyTreeDto parameters) throws PersistenceException {
+    LOG.trace("getFamilyTree({}), persistence", parameters);
     try {
       var params = new ArrayList<>();
       var query = SQL_GET_FAMILY_TREE;

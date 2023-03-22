@@ -147,6 +147,7 @@ public class HorseEndpoint {
 
   @GetMapping("{id}/familytree")
   public Stream<HorseFamilyTreeDto> getFamilyTree(HorseFamilyTreeDto fromHorse) {
+    LOG.info("GET FAMILY TREE " + BASE_PATH + "/{}", fromHorse);
     try {
       return service.getFamilyTree(fromHorse);
     } catch (NotFoundException e) {

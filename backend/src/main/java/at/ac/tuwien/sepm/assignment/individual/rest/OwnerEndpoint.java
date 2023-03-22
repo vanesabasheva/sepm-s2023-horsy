@@ -50,8 +50,9 @@ public class OwnerEndpoint {
     try {
       return service.create(newOwner);
     } catch (ValidationException e) {
-      throw new ResponseStatusException(HttpStatus.UNPROCESSABLE_ENTITY,
-          "Error creating owner", e);
+      HttpStatus status = HttpStatus.UNPROCESSABLE_ENTITY;
+      logClientError(status, e.getMessage(), e);
+      throw new ResponseStatusException(status, e.getMessage());
     } catch (ServiceException e) {
       HttpStatus status = HttpStatus.INTERNAL_SERVER_ERROR;
       logClientError(status, e.getMessage(), e);
