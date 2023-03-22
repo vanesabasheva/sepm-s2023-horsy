@@ -16,6 +16,7 @@ export class OwnerCreateComponent implements OnInit {
     lastName: '',
     email: '',
   };
+  error='';
 
   constructor(
     private service: OwnerService,
@@ -56,10 +57,15 @@ export class OwnerCreateComponent implements OnInit {
           this.router.navigate(['/owners']);
         },
         error: error => {
-          console.error(`Error for adding owner`, error);
-          // TODO show an error message to the user. Include and sensibly present the info from the backend!
+          console.error(error);
+          this.showError(error.error.message);
         }
       });
     }
+  }
+  private showError(message: string) {
+    this.notification.error(message);
+    console.error(`Error: ${message}`);
+    this.error = message;
   }
 }

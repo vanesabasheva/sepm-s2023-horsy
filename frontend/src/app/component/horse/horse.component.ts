@@ -20,6 +20,7 @@ export class HorseComponent implements OnInit {
   searchHorseDateOfBirth = '';
   searchSex = '';
   searchOwner = '';
+  error = '';
 
   constructor(
     private service: HorseService,
@@ -79,6 +80,7 @@ export class HorseComponent implements OnInit {
   deleteHorse(id: number) {
     this.service.deleteHorse(id).subscribe({
       next: data => {
+        this.notification.success(`Horse successfully deleted`);
         this.reloadHorses();
       },
       error: error => {
@@ -90,6 +92,7 @@ export class HorseComponent implements OnInit {
 
   private showError(message: string) {
     console.error(`Error: ${message}`);
+    this.error = message;
   }
 
 }

@@ -29,6 +29,7 @@ export class HorseCreateEditComponent implements OnInit {
     dateOfBirth: new Date(),
     sex: Sex.female,
   };
+  error = '';
 
 
   constructor(
@@ -155,8 +156,8 @@ export class HorseCreateEditComponent implements OnInit {
           this.router.navigate(['/horses']);
         },
         error: error => {
-          console.error('Error creating horse', error);
-          // TODO show an error message to the user. Include and sensibly present the info from the backend!
+          console.error(error);
+          this.showError(error.error.message);
         }
       });
     }
@@ -201,5 +202,6 @@ export class HorseCreateEditComponent implements OnInit {
   private showError(message: string) {
     this.notification.error(message);
     console.error(`Error: ${message}`);
+    this.error = message;
   }
 }
