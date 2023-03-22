@@ -55,7 +55,12 @@
         <div class="col-md-10 col-lg-8"
         >
           <td class="form-control form-control-plaintext">
-            {{horse.sex}}
+            <span *ngIf="horse.sex==='FEMALE'">
+              <i class="bi bi-gender-female"></i>
+            </span>
+            <span *ngIf="horse.sex==='MALE'">
+              <i class="bi bi-gender-male"></i>
+            </span>
           </td>
         </div>
       </div>
