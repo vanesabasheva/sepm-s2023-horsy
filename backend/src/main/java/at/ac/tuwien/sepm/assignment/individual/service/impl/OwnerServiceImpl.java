@@ -27,12 +27,15 @@ public class OwnerServiceImpl implements OwnerService {
 
   private final OwnerDao dao;
   private final OwnerMapper mapper;
+  private final OwnerValidator validator;
 
   public OwnerServiceImpl(
       OwnerDao dao,
-      OwnerMapper mapper) {
+      OwnerMapper mapper,
+      OwnerValidator validator) {
     this.dao = dao;
     this.mapper = mapper;
+    this.validator = validator;
   }
 
   @Override
@@ -78,8 +81,8 @@ public class OwnerServiceImpl implements OwnerService {
   @Override
   public OwnerDto create(OwnerCreateDto newOwner) throws ValidationException, ServiceException {
     LOG.trace("create({})", newOwner);
-    // TODO validation
     try {
+      validator.validateForCreate(newOwner);
       return mapper.entityToDto(dao.create(newOwner));
     } catch (PersistenceException e) {
       throw new ServiceException(e.getMessage(), e);

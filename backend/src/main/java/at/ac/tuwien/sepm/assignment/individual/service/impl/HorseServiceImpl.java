@@ -126,7 +126,8 @@ public class HorseServiceImpl implements HorseService {
   public HorseDetailDto update(HorseDetailDto horse) throws ServiceException, NotFoundException, ValidationException, ConflictException {
     LOG.trace("update({})", horse);
     try {
-      validator.validateForUpdate(horse);
+      List<Horse> allHorses = dao.getAll();
+      validator.validateForUpdate(horse, allHorses);
       var updatedHorse = dao.update(horse);
       var parents = getParents(updatedHorse);
       return mapper.entityToDetailDto(
