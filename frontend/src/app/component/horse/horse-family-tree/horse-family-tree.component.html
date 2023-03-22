@@ -26,6 +26,17 @@
                   [attr.aria-expanded]="true" [attr.aria-controls]="'collapse-' + index">
 
             {{horse.name}}
+            <span class="item-style">
+               <span *ngIf="horse.sex==='FEMALE'">
+                <i class="bi bi-gender-female"></i>
+               </span>
+               <span *ngIf="horse.sex==='MALE'">
+                  <i class="bi bi-gender-male"></i>
+               </span>
+              <span>
+                {{horse.dateOfBirth}}
+              </span>
+            </span>
             <div class="btn-group">
               <a class="btn btn-sm responsive-info-button"
                  (click)="goToHorseDetails(horse.id)"

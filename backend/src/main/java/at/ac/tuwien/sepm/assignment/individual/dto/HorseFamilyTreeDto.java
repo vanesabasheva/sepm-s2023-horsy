@@ -12,7 +12,7 @@ public record HorseFamilyTreeDto(
     Long id,
     String name,
     @DateTimeFormat(iso = DateTimeFormat.ISO.DATE)
-    LocalDate bornBefore,
+    LocalDate dateOfBirth,
     Sex sex,
     Long motherId,
     Long fatherId,
