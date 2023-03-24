@@ -19,6 +19,7 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.server.ResponseStatusException;
 
@@ -38,6 +39,7 @@ public class HorseEndpoint {
   }
 
   @GetMapping
+  @ResponseStatus(HttpStatus.OK)
   public Stream<HorseListDto> searchHorses(HorseSearchDto searchParameters) {
     LOG.info("GET " + BASE_PATH);
     LOG.debug("request parameters: {}", searchParameters);
@@ -55,6 +57,7 @@ public class HorseEndpoint {
   }
 
   @GetMapping("{id}")
+  @ResponseStatus(HttpStatus.OK)
   public HorseDetailDto getById(@PathVariable long id) {
     LOG.info("GET " + BASE_PATH + "/{}", id);
     try {
@@ -72,6 +75,7 @@ public class HorseEndpoint {
 
 
   @PutMapping("{id}")
+  @ResponseStatus(HttpStatus.OK)
   public HorseDetailDto update(@PathVariable long id, @RequestBody HorseDetailDto toUpdate) {
     LOG.info("PUT " + BASE_PATH + "/{}", toUpdate);
     LOG.debug("Body of request:\n{}", toUpdate);
@@ -98,6 +102,7 @@ public class HorseEndpoint {
 
 
   @PostMapping
+  @ResponseStatus(HttpStatus.CREATED)
   public HorseDetailDto create(@RequestBody HorseDetailDto toAdd) {
     LOG.info("PUT " + BASE_PATH + "/{}", toAdd);
     try {
@@ -122,6 +127,7 @@ public class HorseEndpoint {
   }
 
   @DeleteMapping("{id}")
+  @ResponseStatus(HttpStatus.NO_CONTENT)
   public void delete(@PathVariable long id) {
     LOG.info("DELETE " + BASE_PATH + "/{}", id);
     try {
@@ -146,6 +152,7 @@ public class HorseEndpoint {
   }
 
   @GetMapping("{id}/familytree")
+  @ResponseStatus(HttpStatus.OK)
   public Stream<HorseFamilyTreeDto> getFamilyTree(HorseFamilyTreeDto fromHorse) {
     LOG.info("GET FAMILY TREE " + BASE_PATH + "/{}", fromHorse);
     try {
