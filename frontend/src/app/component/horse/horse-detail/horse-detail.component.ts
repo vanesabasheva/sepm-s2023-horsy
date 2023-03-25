@@ -27,6 +27,9 @@ export class HorseDetailComponent implements OnInit {
     private route: ActivatedRoute,
     private notification: ToastrService,
   ) {
+    this.route.paramMap.subscribe(() => {
+      this.ngOnInit();
+    });
   }
 
   ngOnInit(): void {
