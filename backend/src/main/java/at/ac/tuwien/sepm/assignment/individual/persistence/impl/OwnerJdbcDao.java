@@ -5,7 +5,6 @@ import at.ac.tuwien.sepm.assignment.individual.dto.OwnerSearchDto;
 import at.ac.tuwien.sepm.assignment.individual.entity.Owner;
 import at.ac.tuwien.sepm.assignment.individual.exception.FatalException;
 import at.ac.tuwien.sepm.assignment.individual.exception.NotFoundException;
-import at.ac.tuwien.sepm.assignment.individual.exception.PersistenceException;
 import at.ac.tuwien.sepm.assignment.individual.persistence.OwnerDao;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -46,7 +45,7 @@ public class OwnerJdbcDao implements OwnerDao {
 
 
   @Override
-  public Owner getById(long id) throws NotFoundException, PersistenceException {
+  public Owner getById(long id) throws NotFoundException, FatalException {
     LOG.trace("getById({})", id);
     try {
       List<Owner> owners = jdbcTemplate.query(SQL_SELECT_BY_ID, this::mapRow, id);
@@ -59,12 +58,12 @@ public class OwnerJdbcDao implements OwnerDao {
       }
       return owners.get(0);
     } catch (DataAccessException e) {
-      throw new PersistenceException(e.getMessage(), e);
+      throw new FatalException(e.getMessage(), e);
     }
   }
 
   @Override
-  public Owner create(OwnerCreateDto newOwner) throws PersistenceException {
+  public Owner create(OwnerCreateDto newOwner) throws FatalException {
     LOG.trace("create({})", newOwner);
 
     try {
@@ -90,23 +89,23 @@ public class OwnerJdbcDao implements OwnerDao {
           .setEmail(newOwner.email())
           ;
     } catch (DataAccessException e) {
-      throw new PersistenceException(e.getMessage(), e);
+      throw new FatalException(e.getMessage(), e);
     }
   }
 
   @Override
-  public Collection<Owner> getAllById(Collection<Long> ids) throws PersistenceException {
+  public Collection<Owner> getAllById(Collection<Long> ids) throws FatalException {
     LOG.trace("getAllById({})", ids);
     try {
       var statementParams = Collections.singletonMap("ids", ids);
       return jdbcNamed.query(SQL_SELECT_ALL, statementParams, this::mapRow);
     } catch (DataAccessException e) {
-      throw new PersistenceException(e.getMessage(), e);
+      throw new FatalException(e.getMessage(), e);
     }
   }
 
   @Override
-  public Collection<Owner> search(OwnerSearchDto searchParameters) throws PersistenceException {
+  public Collection<Owner> search(OwnerSearchDto searchParameters) throws FatalException {
     LOG.trace("search({})", searchParameters);
     try {
       var query = SQL_SELECT_SEARCH;
@@ -119,7 +118,7 @@ public class OwnerJdbcDao implements OwnerDao {
       }
       return jdbcTemplate.query(query, this::mapRow, params.toArray());
     } catch (DataAccessException e) {
-      throw new PersistenceException(e.getMessage(), e);
+      throw new FatalException(e.getMessage(), e);
     }
   }
 

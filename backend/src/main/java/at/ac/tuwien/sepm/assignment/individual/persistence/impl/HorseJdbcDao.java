@@ -6,7 +6,6 @@ import at.ac.tuwien.sepm.assignment.individual.dto.HorseSearchDto;
 import at.ac.tuwien.sepm.assignment.individual.entity.Horse;
 import at.ac.tuwien.sepm.assignment.individual.exception.FatalException;
 import at.ac.tuwien.sepm.assignment.individual.exception.NotFoundException;
-import at.ac.tuwien.sepm.assignment.individual.exception.PersistenceException;
 import at.ac.tuwien.sepm.assignment.individual.persistence.HorseDao;
 import at.ac.tuwien.sepm.assignment.individual.type.Sex;
 import org.slf4j.Logger;
@@ -26,6 +25,7 @@ import java.sql.Statement;
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 
 @Repository
 public class HorseJdbcDao implements HorseDao {
@@ -71,17 +71,17 @@ public class HorseJdbcDao implements HorseDao {
   }
 
   @Override
-  public List<Horse> getAll() throws PersistenceException {
+  public List<Horse> getAll() {
     LOG.trace("getAll(), persistence");
     try {
       return jdbcTemplate.query(SQL_SELECT_ALL, this::mapRow);
     } catch (DataAccessException e) {
-      throw new PersistenceException("Internal error occurred while fetching all horses", e);
+      throw new FatalException("Internal error occurred while fetching all horses", e);
     }
   }
 
   @Override
-  public List<Horse> search(HorseSearchDto requestParameters) throws PersistenceException {
+  public List<Horse> search(HorseSearchDto requestParameters) {
     LOG.trace("search({}), persistence", requestParameters);
     try {
       var params = new ArrayList<>();
@@ -91,12 +91,12 @@ public class HorseJdbcDao implements HorseDao {
       var query = SQL_SELECT_SEARCH_PARENTS;
       return jdbcTemplate.query(query, this::mapRow, params.toArray());
     } catch (DataAccessException e) {
-      throw new PersistenceException("Internal error occurred while fetching horses suggestions", e);
+      throw new FatalException("Internal error occurred while fetching horses suggestions", e);
     }
   }
 
   @Override
-  public List<Horse> getAll(HorseSearchDto parameters) throws PersistenceException {
+  public List<Horse> getAll(HorseSearchDto parameters) {
     LOG.trace("getAll({}), persistence", parameters);
     try {
       var query = SQL_SELECT_SEARCH;
@@ -108,22 +108,22 @@ public class HorseJdbcDao implements HorseDao {
       LocalDate bornBeforeParameter = parameters.bornBefore() == null ? LocalDate.now() : parameters.bornBefore();
       params.add(bornBeforeParameter);
 
-      if (parameters.description() != "") {
+      if (!Objects.equals(parameters.description(), "")) {
         query += " AND UPPER(description) like UPPER('%'||COALESCE(?, '')||'%')";
         params.add(parameters.description());
       }
-      if (parameters.ownerName() != "") {
+      if (!Objects.equals(parameters.ownerName(), "")) {
         query += " AND CONCAT(CONCAT(UPPER(owner.first_name), ' '), UPPER(owner.last_name)) like UPPER('%'||COALESCE(?, '')||'%');";
         params.add(parameters.ownerName());
       }
       return jdbcTemplate.query(query, this::mapRow, params.toArray());
     } catch (DataAccessException e) {
-      throw new PersistenceException("Internal error occurred while fetching horses with given parameters", e);
+      throw new FatalException("Internal error occurred while fetching horses with given parameters", e);
     }
   }
 
   @Override
-  public Horse getById(long id) throws NotFoundException, PersistenceException {
+  public Horse getById(long id) throws NotFoundException {
     LOG.trace("getById({}), persistence", id);
     try {
       List<Horse> horses;
@@ -139,13 +139,13 @@ public class HorseJdbcDao implements HorseDao {
 
       return horses.get(0);
     } catch (DataAccessException e) {
-      throw new PersistenceException("Internal error occurred while fetching horse with the given id", e);
+      throw new FatalException("Internal error occurred while fetching horse with the given id", e);
     }
   }
 
 
   @Override
-  public Horse update(HorseDetailDto horse) throws NotFoundException, PersistenceException {
+  public Horse update(HorseDetailDto horse) throws NotFoundException {
     LOG.trace("update({}), persistence", horse);
     try {
       KeyHolder keyHolder = new GeneratedKeyHolder();
@@ -188,13 +188,13 @@ public class HorseJdbcDao implements HorseDao {
           .setMotherId(horse.motherId())
           .setFatherId(horse.fatherId());
     } catch (DataAccessException e) {
-      throw new PersistenceException("Internal error occurred while editing horse", e);
+      throw new FatalException("Internal error occurred while editing horse", e);
     }
   }
 
 
   @Override
-  public Horse create(HorseDetailDto newHorse) throws PersistenceException {
+  public Horse create(HorseDetailDto newHorse) {
     LOG.trace("create({}), persistence", newHorse);
     try {
       KeyHolder keyHolder = new GeneratedKeyHolder();
@@ -232,27 +232,23 @@ public class HorseJdbcDao implements HorseDao {
           .setFatherId(newHorse.fatherId())
           ;
     } catch (DataAccessException e) {
-      throw new PersistenceException("Internal error occurred while creating horse", e);
+      throw new FatalException("Internal error occurred while creating horse", e);
     }
   }
 
   @Override
-  public void delete(long id) throws PersistenceException {
+  public void delete(long id) {
     LOG.trace("delete({}), persistence", id);
-    try {
-      KeyHolder keyHolder = new GeneratedKeyHolder();
-      jdbcTemplate.update(connection -> {
-        PreparedStatement stmt = connection.prepareStatement(SQL_DELETE, Statement.RETURN_GENERATED_KEYS);
-        stmt.setLong(1, id);
-        return stmt;
-      }, keyHolder);
-    } catch (DataAccessException e) {
-      throw new PersistenceException("Internal error occurred while deleting horses", e);
-    }
+    KeyHolder keyHolder = new GeneratedKeyHolder();
+    jdbcTemplate.update(connection -> {
+      PreparedStatement stmt = connection.prepareStatement(SQL_DELETE, Statement.RETURN_GENERATED_KEYS);
+      stmt.setLong(1, id);
+      return stmt;
+    }, keyHolder);
   }
 
   @Override
-  public List<Horse> getFamilyTree(HorseFamilyTreeDto parameters) throws PersistenceException {
+  public List<Horse> getFamilyTree(HorseFamilyTreeDto parameters) {
     LOG.trace("getFamilyTree({}), persistence", parameters);
     try {
       var params = new ArrayList<>();
@@ -261,7 +257,7 @@ public class HorseJdbcDao implements HorseDao {
       params.add(parameters.generations());
       return jdbcTemplate.query(query, this::mapRow, params.toArray());
     } catch (DataAccessException e) {
-      throw new PersistenceException("Internal error occurred while getting family tree of horse", e);
+      throw new FatalException("Internal error occurred while getting family tree of horse", e);
     }
   }
 

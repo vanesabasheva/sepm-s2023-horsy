@@ -4,7 +4,6 @@ import at.ac.tuwien.sepm.assignment.individual.dto.OwnerCreateDto;
 import at.ac.tuwien.sepm.assignment.individual.dto.OwnerDto;
 import at.ac.tuwien.sepm.assignment.individual.dto.OwnerSearchDto;
 import at.ac.tuwien.sepm.assignment.individual.exception.NotFoundException;
-import at.ac.tuwien.sepm.assignment.individual.exception.ServiceException;
 import at.ac.tuwien.sepm.assignment.individual.exception.ValidationException;
 
 import java.util.Collection;
@@ -22,7 +21,7 @@ public interface OwnerService {
    * @return the owner with the given ID
    * @throws NotFoundException if no owner with the given ID exists in the persistent data store
    */
-  OwnerDto getById(long id) throws NotFoundException, ServiceException;
+  OwnerDto getById(long id) throws NotFoundException;
 
   /**
    * Fetch all owners referenced by the IDs in {@code ids}
@@ -31,7 +30,7 @@ public interface OwnerService {
    * @return a map that contains the requested owners with their IDs as key
    * @throws NotFoundException if any of the requested owners is not found
    */
-  Map<Long, OwnerDto> getAllById(Collection<Long> ids) throws NotFoundException, ServiceException;
+  Map<Long, OwnerDto> getAllById(Collection<Long> ids) throws NotFoundException;
 
   /**
    * Search for owners matching the criteria in {@code searchParameters}.
@@ -44,7 +43,7 @@ public interface OwnerService {
    * @param searchParameters object containing the search parameters to match
    * @return a stream containing owners matching the criteria in {@code searchParameters}
    */
-  Stream<OwnerDto> search(OwnerSearchDto searchParameters) throws ServiceException;
+  Stream<OwnerDto> search(OwnerSearchDto searchParameters);
 
   /**
    * Create a new owner in the persistent data store.
@@ -53,5 +52,5 @@ public interface OwnerService {
    * @return the owner, that was just newly created in the persistent data store
    * @throws ValidationException if the
    */
-  OwnerDto create(OwnerCreateDto newOwner) throws ValidationException, ServiceException;
+  OwnerDto create(OwnerCreateDto newOwner) throws ValidationException;
 }

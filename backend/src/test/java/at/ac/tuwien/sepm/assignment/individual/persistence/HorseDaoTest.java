@@ -4,7 +4,6 @@ import at.ac.tuwien.sepm.assignment.individual.dto.HorseFamilyTreeDto;
 import at.ac.tuwien.sepm.assignment.individual.dto.HorseSearchDto;
 import at.ac.tuwien.sepm.assignment.individual.entity.Horse;
 import at.ac.tuwien.sepm.assignment.individual.exception.NotFoundException;
-import at.ac.tuwien.sepm.assignment.individual.exception.PersistenceException;
 import at.ac.tuwien.sepm.assignment.individual.type.Sex;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -31,7 +30,7 @@ public class HorseDaoTest {
 
   @Test
   @DisplayName("getAll for horses returns all stored horses")
-  public void getAllReturnsAllStoredHorses() throws PersistenceException {
+  public void getAllReturnsAllStoredHorses() {
     List<Horse> horses = horseDao.getAll();
     assertThat(horses.size()).isGreaterThanOrEqualTo(10);
     assertThat(horses)
@@ -41,7 +40,7 @@ public class HorseDaoTest {
 
   @Test
   @DisplayName("getAll({}) of horses returns all horses matching the parameters")
-  public void getAllWithParametersReturnsRelevantHorses() throws PersistenceException {
+  public void getAllWithParametersReturnsRelevantHorses() {
     HorseSearchDto horseSearchDto = new HorseSearchDto("Gwe", "", null, Sex.FEMALE, "", 5);
     List<Horse> horses = horseDao.getAll(horseSearchDto);
     assertThat(horses)
@@ -60,7 +59,7 @@ public class HorseDaoTest {
   @DisplayName("Delete on a existing horse deletes the horse permanently from the persistent data storage")
   @Transactional
   @Rollback
-  public void deleteExistingHorseRemovesTheHorsePermanently() throws PersistenceException {
+  public void deleteExistingHorseRemovesTheHorsePermanently() {
     long id = -2;
     boolean exists = false;
     boolean deletedExists = false;
@@ -82,7 +81,7 @@ public class HorseDaoTest {
 
   @Test
   @DisplayName("getFamilyTree of horse with no mother and father returns the horse itself")
-  public void getFamilyTreeOfHorseReturnsAllRelatedHorses() throws PersistenceException {
+  public void getFamilyTreeOfHorseReturnsAllRelatedHorses() {
     List<Horse> horses = horseDao.getFamilyTree(
         new HorseFamilyTreeDto(-2L, "Candy", LocalDate.of(2020, 10, 10), Sex.MALE, null, null, 2L));
     assertThat(horses)

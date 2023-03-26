@@ -4,7 +4,6 @@ import at.ac.tuwien.sepm.assignment.individual.dto.HorseDetailDto;
 import at.ac.tuwien.sepm.assignment.individual.dto.HorseListDto;
 import at.ac.tuwien.sepm.assignment.individual.exception.ConflictException;
 import at.ac.tuwien.sepm.assignment.individual.exception.NotFoundException;
-import at.ac.tuwien.sepm.assignment.individual.exception.ServiceException;
 import at.ac.tuwien.sepm.assignment.individual.exception.ValidationException;
 import at.ac.tuwien.sepm.assignment.individual.service.impl.HorseValidator;
 import at.ac.tuwien.sepm.assignment.individual.type.Sex;
@@ -33,7 +32,7 @@ public class HorseServiceTest {
 
   @Test
   @DisplayName("getAll for horses returns all stored horses")
-  public void getAllReturnsAllStoredHorses() throws ServiceException {
+  public void getAllReturnsAllStoredHorses() {
     List<HorseListDto> horses = horseService.allHorses()
         .toList();
     assertThat(horses.size()).isGreaterThanOrEqualTo(10);
@@ -72,7 +71,7 @@ public class HorseServiceTest {
   @DisplayName("Creating a horse with valid data throws no exception")
   @Transactional
   @Rollback
-  public void createValidHorse() throws ValidationException, ServiceException, ConflictException, NotFoundException {
+  public void createValidHorse() throws ValidationException, ConflictException, NotFoundException {
     HorseDetailDto horse = new HorseDetailDto(null, "TestCreate", "description", LocalDate.now(), Sex.MALE, null, null, null);
     horseService.create(horse);
     List<HorseListDto> horses = horseService.allHorses().toList();
