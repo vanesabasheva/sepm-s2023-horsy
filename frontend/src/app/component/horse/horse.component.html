@@ -59,7 +59,7 @@
             (change)="searchHorses()"
             [(ngModel)]=searchSex
             >
-      <option [ngValue]="undefined" disabled selected>Select Sex</option>
+      <option value="" (click)="clearFilter()">Select Sex</option>
       <option value="FEMALE">Female</option>
       <option value="MALE">Male</option>
     </select>

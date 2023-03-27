@@ -90,9 +90,13 @@ export class HorseComponent implements OnInit {
     });
   }
 
+  clearFilter() {
+    this.searchSex = '';
+    this.searchHorses();
+  }
+
   private showError(message: string) {
     console.error(`Error: ${message}`);
     this.error = message;
   }
-
 }
