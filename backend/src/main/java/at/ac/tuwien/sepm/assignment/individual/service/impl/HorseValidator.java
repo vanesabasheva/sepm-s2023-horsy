@@ -98,7 +98,7 @@ public class HorseValidator {
     LOG.trace("validateForCreate({})", newHorse);
     List<String> validationErrors = new ArrayList<>();
     List<String> conflictErrors = new ArrayList<>();
-    if (newHorse.name() == null) {
+    if (newHorse.name() == null || newHorse.name().isBlank()) {
       validationErrors.add("Horse name cannot be empty");
     } else {
       if (newHorse.name().length() > 255) {
@@ -156,7 +156,7 @@ public class HorseValidator {
 
 
     if (!conflictErrors.isEmpty()) {
-      throw new ConflictException("Validation of horse for update failed", conflictErrors);
+      throw new ConflictException("Validation of horse to create failed", conflictErrors);
     }
     if (!validationErrors.isEmpty()) {
       throw new ValidationException("Validation of horse to create failed", validationErrors);

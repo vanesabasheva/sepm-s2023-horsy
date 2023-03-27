@@ -3,7 +3,7 @@ CREATE TABLE IF NOT EXISTS owner
     id         BIGINT AUTO_INCREMENT PRIMARY KEY,
     first_name VARCHAR(255) NOT NULL,
     last_name  VARCHAR(255) NOT NULL,
-    email      VARCHAR(255)
+    email      VARCHAR(255) UNIQUE
 );
 
 CREATE TABLE IF NOT EXISTS horse

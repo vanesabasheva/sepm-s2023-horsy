@@ -3,6 +3,7 @@ package at.ac.tuwien.sepm.assignment.individual.service.impl;
 import at.ac.tuwien.sepm.assignment.individual.dto.OwnerCreateDto;
 import at.ac.tuwien.sepm.assignment.individual.dto.OwnerDto;
 import at.ac.tuwien.sepm.assignment.individual.dto.OwnerSearchDto;
+import at.ac.tuwien.sepm.assignment.individual.entity.Owner;
 import at.ac.tuwien.sepm.assignment.individual.exception.NotFoundException;
 import at.ac.tuwien.sepm.assignment.individual.exception.ValidationException;
 import at.ac.tuwien.sepm.assignment.individual.mapper.OwnerMapper;
@@ -67,7 +68,8 @@ public class OwnerServiceImpl implements OwnerService {
   @Override
   public OwnerDto create(OwnerCreateDto newOwner) throws ValidationException {
     LOG.trace("create({})", newOwner);
-    validator.validateForCreate(newOwner);
+    Collection<Owner> allOwners = dao.search(new OwnerSearchDto("", Integer.MAX_VALUE));
+    validator.validateForCreate(newOwner, allOwners);
     return mapper.entityToDto(dao.create(newOwner));
 
   }
