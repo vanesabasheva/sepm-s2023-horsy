@@ -58,14 +58,9 @@ export class OwnerCreateComponent implements OnInit {
         },
         error: error => {
           console.error(error);
-          this.showError(error.error.message);
+          this.notification.error(error.error.errors, 'Error creating owner');
         }
       });
     }
-  }
-  private showError(message: string) {
-    this.notification.error(message);
-    console.error(`Error: ${message}`);
-    this.error = message;
   }
 }

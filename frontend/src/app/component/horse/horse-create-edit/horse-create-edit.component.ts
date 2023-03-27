@@ -134,6 +134,7 @@ export class HorseCreateEditComponent implements OnInit {
   public onSubmit(form: NgForm): void {
     console.log('is form valid?', form.valid, this.horse);
     if (form.valid) {
+      let title = '';
       if (this.horse.description === '') {
         delete this.horse.description;
       }
@@ -141,10 +142,12 @@ export class HorseCreateEditComponent implements OnInit {
       switch (this.mode) {
         case HorseCreateEditMode.create:
           observable = this.service.create(this.horse);
+          title = 'Error creating horse';
           break;
         case HorseCreateEditMode.edit:
           const id = Number(this.route.snapshot.paramMap.get('id'));
           observable = this.service.edit(id, this.horse);
+          title = 'Error editing horse';
           break;
         default:
           console.error('Unknown HorseCreateEditMode', this.mode);
@@ -157,7 +160,7 @@ export class HorseCreateEditComponent implements OnInit {
         },
         error: error => {
           console.error(error);
-          this.showError(error.error.message);
+          this.notification.error(error.error.errors, title);
         }
       });
     }
@@ -170,19 +173,7 @@ export class HorseCreateEditComponent implements OnInit {
       }
     });
   }
-
-  private getHorse(id: number) {
-    this.service.getByID(id).subscribe({
-      next: (data: Horse) => {
-        this.horse = data;
-      },
-      error: (error: any) => {
-        console.error('Error editing horse', error);
-      }
-    });
-  }
-
-  private deleteHorse(id: number) {
+  deleteHorse(id: number) {
     this.service.deleteHorse(id).subscribe({
       next: data => {
         this.notification.success(`Horse ${this.horse.name} successfully deleted`);
@@ -195,6 +186,17 @@ export class HorseCreateEditComponent implements OnInit {
       error: error => {
         console.error(error.message);
         this.showError('Failed to delete horse: ' + error.error.message);
+      }
+    });
+  }
+
+  private getHorse(id: number) {
+    this.service.getByID(id).subscribe({
+      next: (data: Horse) => {
+        this.horse = data;
+      },
+      error: (error: any) => {
+        console.error('Error editing horse', error);
       }
     });
   }
