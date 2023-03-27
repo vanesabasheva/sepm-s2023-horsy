@@ -59,6 +59,9 @@ public interface HorseService {
   /**
    * @param newHorse the horse to add
    * @return the newly added horse
+   * @throws NotFoundException   if the horse with the given ID does not exist in the persistent data store
+   * @throws ValidationException if the  data given for the horse is in itself incorrect (description too long, no name, …)
+   * @throws ConflictException   if the data given for the horse is in conflict the data currently in the system (owner does not exist, …)
    */
   HorseDetailDto create(HorseDetailDto newHorse) throws NotFoundException, ValidationException, ConflictException;
 
@@ -66,6 +69,7 @@ public interface HorseService {
    * Deletes the Horse specified by an id.
    *
    * @param id the id from the specified horse
+   * @throws NotFoundException if the horse with the given ID does not exist in the persistent data store
    */
   void delete(long id) throws NotFoundException;
 

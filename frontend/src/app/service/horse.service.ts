@@ -113,6 +113,13 @@ export class HorseService {
     return this.http.get<Horse[]>(baseUri, {params});
   }
 
+  /**
+   * Get all ancestors of the horse with the given id
+   *
+   * @param id the horse's id to get all ancestors from
+   * @param limit the number of generations that should be returned
+   * @return observable list of the horse's family tree
+   */
   getFamilyTree(id: number, limit: number): Observable<HorseFamilyTree[]> {
     const params = new HttpParams()
       .set('id', id)
