@@ -123,6 +123,7 @@ public class OwnerJdbcDao implements OwnerDao {
   }
 
   private Owner mapRow(ResultSet resultSet, int i) throws SQLException {
+    LOG.trace("mapRow({})", resultSet);
     return new Owner()
         .setId(resultSet.getLong("id"))
         .setFirstName(resultSet.getString("first_name"))

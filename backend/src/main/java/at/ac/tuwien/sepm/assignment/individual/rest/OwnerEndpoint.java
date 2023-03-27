@@ -7,7 +7,6 @@ import at.ac.tuwien.sepm.assignment.individual.exception.ValidationException;
 import at.ac.tuwien.sepm.assignment.individual.service.OwnerService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -40,9 +39,5 @@ public class OwnerEndpoint {
   public OwnerDto create(@RequestBody OwnerCreateDto newOwner) throws ValidationException {
     LOG.info("POST" + BASE_PATH + "/{}", newOwner);
     return service.create(newOwner);
-  }
-
-  private void logClientError(HttpStatus status, String message, Exception e) {
-    LOG.warn("{} {}: {}: {}", status.value(), message, e.getClass().getSimpleName(), e.getMessage());
   }
 }

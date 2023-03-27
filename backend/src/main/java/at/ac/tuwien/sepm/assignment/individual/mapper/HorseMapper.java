@@ -93,6 +93,7 @@ public class HorseMapper {
   }
 
   private OwnerDto getOwner(Horse horse, Map<Long, OwnerDto> owners) {
+    LOG.trace("getOwner({}), mapper", horse);
     OwnerDto owner = null;
     var ownerId = horse.getOwnerId();
     if (ownerId != null) {

@@ -263,6 +263,7 @@ public class HorseJdbcDao implements HorseDao {
 
 
   private Horse mapRow(ResultSet result, int rownum) throws SQLException {
+    LOG.trace("mapRow({}), persistence", result);
     return new Horse()
         .setId(result.getLong("id"))
         .setName(result.getString("name"))
