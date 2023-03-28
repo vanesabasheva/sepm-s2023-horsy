@@ -1,6 +1,7 @@
 logging:
   level:
     root: INFO
+    at.ac.tuwien.sepm.assignment.individual: TRACE
   file:
     name: ./log/wendys-friends.log
   pattern:
