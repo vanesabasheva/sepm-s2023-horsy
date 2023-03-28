@@ -1,23 +1,24 @@
 package at.ac.tuwien.sepm.assignment.individual.rest;
 
 import at.ac.tuwien.sepm.assignment.individual.dto.HorseListDto;
+import at.ac.tuwien.sepm.assignment.individual.persistence.DataGeneratorBean;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import net.minidev.json.JSONObject;
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.http.MediaType;
-import org.springframework.test.annotation.Rollback;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.web.WebAppConfiguration;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.MvcResult;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
-import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.context.WebApplicationContext;
 import org.springframework.web.servlet.config.annotation.EnableWebMvc;
 
+import java.sql.SQLException;
 import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -38,6 +39,27 @@ public class HorseEndpointTest {
   private MockMvc mockMvc;
   @Autowired
   ObjectMapper objectMapper;
+  @Autowired
+  DataGeneratorBean dataGeneratorBean;
+
+  @BeforeEach
+  void setupData() {
+    try {
+      dataGeneratorBean.createSchema();
+      dataGeneratorBean.generateData();
+    } catch (SQLException e) {
+      throw new RuntimeException(e);
+    }
+  }
+
+  @AfterEach
+  void cleanupData() {
+    try {
+      dataGeneratorBean.deleteSchema();
+    } catch (SQLException e) {
+      throw new RuntimeException(e);
+    }
+  }
 
   @BeforeEach
   public void setup() {
@@ -98,8 +120,6 @@ public class HorseEndpointTest {
   }
 
   @Test
-  @Transactional
-  @Rollback
   public void deleteOfExistingHorseReturns204and404() throws Exception {
     mockMvc.perform(delete("/horses/-9"))
         .andExpect(status().isNoContent());

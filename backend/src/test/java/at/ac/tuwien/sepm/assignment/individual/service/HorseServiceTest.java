@@ -5,16 +5,18 @@ import at.ac.tuwien.sepm.assignment.individual.dto.HorseListDto;
 import at.ac.tuwien.sepm.assignment.individual.exception.ConflictException;
 import at.ac.tuwien.sepm.assignment.individual.exception.NotFoundException;
 import at.ac.tuwien.sepm.assignment.individual.exception.ValidationException;
+import at.ac.tuwien.sepm.assignment.individual.persistence.DataGeneratorBean;
 import at.ac.tuwien.sepm.assignment.individual.service.impl.HorseValidator;
 import at.ac.tuwien.sepm.assignment.individual.type.Sex;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.test.annotation.Rollback;
 import org.springframework.test.context.ActiveProfiles;
-import org.springframework.transaction.annotation.Transactional;
 
+import java.sql.SQLException;
 import java.time.LocalDate;
 import java.util.List;
 
@@ -30,6 +32,29 @@ public class HorseServiceTest {
   @Autowired
   HorseService horseService;
 
+  @Autowired
+  DataGeneratorBean dataGeneratorBean;
+
+  @BeforeEach
+  void setupData() {
+    try {
+      dataGeneratorBean.createSchema();
+      dataGeneratorBean.generateData();
+    } catch (SQLException e) {
+      throw new RuntimeException(e);
+    }
+  }
+
+  @AfterEach
+  void cleanupData() {
+    try {
+      dataGeneratorBean.deleteSchema();
+    } catch (SQLException e) {
+      throw new RuntimeException(e);
+    }
+  }
+
+
   @Test
   @DisplayName("getAll for horses returns all stored horses")
   public void getAllReturnsAllStoredHorses() {
@@ -43,7 +68,6 @@ public class HorseServiceTest {
 
   @Test
   @DisplayName("Delete on a non - existing horse throws NotFoundException")
-  @Rollback
   public void deleteNotExistingHorseThrowsNotFoundException() {
     assertThrows(NotFoundException.class,
         () -> horseService.delete(42L));
@@ -51,7 +75,6 @@ public class HorseServiceTest {
 
   @Test
   @DisplayName("Create a new horse with a younger mother throws ConflictException")
-  @Rollback
   public void createWithYoungerMotherThrowsConflictException() {
     HorseDetailDto mother = new HorseDetailDto(1L, "Mother", "", LocalDate.now(), Sex.FEMALE, null, null, null);
     assertThrows(ConflictException.class,
@@ -60,7 +83,6 @@ public class HorseServiceTest {
 
   @Test
   @DisplayName("ValidatorForCreate throws no exceptions if horse is valid")
-  @Rollback
   public void validationOfCorrectParametersThrowsNoExceptions() {
     HorseValidator validator = new HorseValidator();
     HorseDetailDto horse = new HorseDetailDto(null, "Gwendy", "The guinea pig", LocalDate.now(), Sex.FEMALE, null, null, null);
@@ -69,8 +91,6 @@ public class HorseServiceTest {
 
   @Test
   @DisplayName("Creating a horse with valid data throws no exception")
-  @Transactional
-  @Rollback
   public void createValidHorse() throws ValidationException, ConflictException, NotFoundException {
     HorseDetailDto horse = new HorseDetailDto(null, "TestCreate", "description", LocalDate.now(), Sex.MALE, null, null, null);
     horseService.create(horse);

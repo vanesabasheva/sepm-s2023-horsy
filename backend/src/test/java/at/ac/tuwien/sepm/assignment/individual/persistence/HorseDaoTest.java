@@ -5,14 +5,15 @@ import at.ac.tuwien.sepm.assignment.individual.dto.HorseSearchDto;
 import at.ac.tuwien.sepm.assignment.individual.entity.Horse;
 import at.ac.tuwien.sepm.assignment.individual.exception.NotFoundException;
 import at.ac.tuwien.sepm.assignment.individual.type.Sex;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.test.annotation.Rollback;
 import org.springframework.test.context.ActiveProfiles;
-import org.springframework.transaction.annotation.Transactional;
 
+import java.sql.SQLException;
 import java.time.LocalDate;
 import java.util.List;
 
@@ -27,6 +28,29 @@ public class HorseDaoTest {
 
   @Autowired
   HorseDao horseDao;
+
+  @Autowired
+  DataGeneratorBean dataGeneratorBean;
+
+  @BeforeEach
+  void setupData() {
+    try {
+      dataGeneratorBean.createSchema();
+      dataGeneratorBean.generateData();
+    } catch (SQLException e) {
+      throw new RuntimeException(e);
+    }
+  }
+
+  @AfterEach
+  void cleanupData() {
+    try {
+      dataGeneratorBean.deleteSchema();
+    } catch (SQLException e) {
+      throw new RuntimeException(e);
+    }
+  }
+
 
   @Test
   @DisplayName("getAll for horses returns all stored horses")
@@ -57,8 +81,7 @@ public class HorseDaoTest {
 
   @Test
   @DisplayName("Delete on a existing horse deletes the horse permanently from the persistent data storage")
-  @Transactional
-  @Rollback
+
   public void deleteExistingHorseRemovesTheHorsePermanently() {
     long id = -2;
     boolean exists = false;

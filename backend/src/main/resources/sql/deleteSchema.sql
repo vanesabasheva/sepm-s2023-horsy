@@ -1,0 +1,2 @@
+DROP TABLE horse;
+DROP TABLE owner;
